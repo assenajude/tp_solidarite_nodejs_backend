@@ -1,0 +1,19 @@
+{
+  "dbConfig": {
+    "HOST": "192.168.1.178",
+    "USER": "postgres",
+    "PASSWORD": "kouakou01",
+    "DB": "solidaritedb",
+    "dialect": "postgres",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    }
+
+  },
+  "assetsBaseUrl": "http://192.168.1.178:5000/images/",
+
+  "port": 5000
+}
