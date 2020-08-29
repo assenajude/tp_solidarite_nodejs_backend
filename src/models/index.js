@@ -38,6 +38,8 @@ db.shoppingCart = require('./shoppingCart.model')(sequelize, Sequelize);
 db.cartItem = require('./cartItem.model')(sequelize, Sequelize);
 db.userPayement = require('./userPayement.model')(sequelize, Sequelize);
 db.userFacture = require('./userFacture.model')(sequelize, Sequelize);
+db.adresseLivraison = require('./adresseLivraison.model')(sequelize, Sequelize);
+db.pointRelais = require('./pointRelais.model')(sequelize, Sequelize);
 
 
 
@@ -91,6 +93,11 @@ db.payement.belongsToMany(db.user, {
 db.userPayement.belongsTo(db.userFacture);
 db.userFacture.hasMany(db.userPayement)
 
+db.pointRelais.belongsTo(db.adresseLivraison);
+db.adresseLivraison.hasMany(db.pointRelais);
+
+db.userAdresse.belongsTo(db.pointRelais);
+db.pointRelais.hasMany(db.userAdresse)
 
 
 
