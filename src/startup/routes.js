@@ -8,6 +8,9 @@ const planRoutes = require('../routes/plan.routes');
 const adresseLivraisonRoutes = require('../routes/adresseLivraison.routes');
 const pointRoutes = require('../routes/pointRelais.routes');
 const userAdresseRoutes = require('../routes/userAdresse.routes')
+const regionRoutes  = require('../routes/region.routes');
+const villeRoutes = require('../routes/ville.routes')
+const orderRoutes = require('../routes/commande.routes')
 
 module.exports = function routes(app) {
     app.use('/api/auth', authRoute);
@@ -19,6 +22,9 @@ module.exports = function routes(app) {
     app.use('/api/plans', planRoutes);
     app.use('/api/adresseLivraisons', adresseLivraisonRoutes);
     app.use('/api/pointRelais', pointRoutes);
-    app.use('/api/userAdresses', userAdresseRoutes)
+    app.use('/api/userAdresses', userAdresseRoutes);
+    app.use('/api/regions', regionRoutes);
+    app.use('/api/villes', villeRoutes)
+    app.use('/api/commandes', orderRoutes)
 
 }

@@ -11,7 +11,7 @@ const db = require('./src/models/index');
 const initialiseRole = require('./src/startup/initRoleFunction')
 db.sequelize.sync().then(() => {
     logger.info('the app has been successfully connected to the database');
- //initialiseRole()
+ // initialiseRole()
 });
 
 const corsOption = {

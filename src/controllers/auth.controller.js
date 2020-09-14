@@ -7,6 +7,9 @@ const Role = db.role;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+let authToken = null;
+
+
 signup = async (req, res, next) => {
     const newUser = {
         username: req.body.username,
@@ -19,7 +22,9 @@ signup = async (req, res, next) => {
         pieceIdentite: req.body.pieceIdentite,
         password: bcrypt.hashSync(req.body.password, 8)
     };
+
     try {
+        let roles = []
         let user = await User.create(newUser);
         if (req.body.roles) {
             const userRoles = await Role.findAll({
@@ -29,15 +34,14 @@ signup = async (req, res, next) => {
                     }
                 }
             })
-            await user.setRoles(userRoles);
-            res.status(201).send(`L'utilisateur a été enregistré avec succès`)
+           await user.setRoles(userRoles);
         } else {
-            user.setRoles([3]);
-            res.status(201).send(`L'utilisateur a été enregistré avec succès`)
-        }
+           await user.setRoles([3]);
+        };
+        res.status(201).send(` L'utilisateur a été créé avec succès`)
 
     } catch (error) {
-        return res.status(500).send(error.message)
+         res.status(500).send(`Impossible de creer l'utilisateur, il l'erreur suivant: ${error.message}`)
     }
 };
 
@@ -73,21 +77,42 @@ signin = async (req, res, next) => {
                  message: 'password invalide'
              })
          };
-         let token = jwt.sign({id: user.id}, jwtSecretConfig.secret, {
+        let authorities = [];
+        const roles = await user.getRoles();
+        roles.forEach(role => {
+            authorities.push('ROLE_' + role.name.toUpperCase())
+        })
+
+         authToken = jwt.sign({
+             id: user.id,
+             username: user.username,
+             email:user.email,
+             nom: user.nom,
+             prenom: user.prenom,
+             phone: user.phone,
+             adresse: user.adresse,
+             avatar: user.avatar,
+             pieceIdentite: user.pieceIdentite,
+             roles: authorities
+         }, jwtSecretConfig.secret, {
              expiresIn: 86400
          });
 
-         let authorities = [];
-         const roles = await user.getRoles();
-          roles.forEach(role => {
-              authorities.push('ROLE_' + role.name.toUpperCase())
-          })
-        return res.status(200).send({
-            id: user.id,
+
+ /*       const selectedUser = {
             username: user.username,
-            email: user.email,
-            roles: authorities,
-            accessToken: token
+            email:user.email,
+            nom: user.nom,
+            prenom: user.prenom,
+            phone: user.phone,
+            adresse: user.adresse,
+            avatar: user.avatar,
+            pieceIdentite: user.pieceIdentite,
+        }*/
+        return res.status(200).send({
+           /* user: selectedUser,
+            roles: authorities,*/
+            accessToken: authToken
         })
     } catch (e) {
         return res.status(500).send(e.message)

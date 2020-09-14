@@ -3,11 +3,14 @@ const AdresseLivraison = db.adresseLivraison;
 const PointRelais = db.pointRelais
 
 const addAdresseLivraison = async (req, res, next) => {
-    const newAdresse = {
+/*    const newAdresse = {
         region: req.body.region,
         ville: req.body.ville ,
         distance: req.body.distance,
         coutLivraison: req.body.cout
+    }*/
+    const newAdresse = {
+        ...req.body
     }
     try {
         const adresse = await AdresseLivraison.create(newAdresse);

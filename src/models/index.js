@@ -38,9 +38,11 @@ db.shoppingCart = require('./shoppingCart.model')(sequelize, Sequelize);
 db.cartItem = require('./cartItem.model')(sequelize, Sequelize);
 db.userPayement = require('./userPayement.model')(sequelize, Sequelize);
 db.userFacture = require('./userFacture.model')(sequelize, Sequelize);
-db.adresseLivraison = require('./adresseLivraison.model')(sequelize, Sequelize);
 db.pointRelais = require('./pointRelais.model')(sequelize, Sequelize);
-
+db.region = require('./region.model')(sequelize, Sequelize);
+db.ville = require('./ville.model')(sequelize, Sequelize);
+db.orderItem = require('./orderItem.model')(sequelize, Sequelize);
+db.cartItem = require('./cartItem.model')(sequelize,Sequelize);
 
 
 db.user.belongsToMany(db.role, {
@@ -79,6 +81,8 @@ db.shoppingCart.belongsToMany(db.article, {
     otherKey: 'articleId'
 });
 
+
+
 db.user.belongsToMany(db.payement, {
     through: db.userPayement,
     foreignKey: 'userId',
@@ -93,15 +97,57 @@ db.payement.belongsToMany(db.user, {
 db.userPayement.belongsTo(db.userFacture);
 db.userFacture.hasMany(db.userPayement)
 
-db.pointRelais.belongsTo(db.adresseLivraison);
-db.adresseLivraison.hasMany(db.pointRelais);
+db.region.hasMany(db.ville);
+db.ville.belongsTo(db.region);
+
+db.pointRelais.belongsTo(db.ville);
+db.ville.hasMany(db.pointRelais)
 
 db.userAdresse.belongsTo(db.pointRelais);
-db.pointRelais.hasMany(db.userAdresse)
+db.pointRelais.hasMany(db.userAdresse);
+
+db.userAdresse.belongsTo(db.user);
+db.user.hasMany(db.userAdresse);
+
+db.commande.belongsTo(db.user);
+db.user.hasMany(db.commande);
+
+db.commande.belongsTo(db.userAdresse);
+db.userAdresse.hasMany(db.commande);
+
+db.commande.belongsTo(db.plan);
+db.plan.hasMany(db.commande);
+
+db.article.belongsToMany(db.shoppingCart,{
+    through: db.cartItem,
+    foreignKey: 'articleId',
+    otherKey: 'shoppingCartId'
+});
+db.shoppingCart.belongsToMany(db.article, {
+    through: db.cartItem,
+    foreignKey: 'shoppingCartId',
+    otherKey: 'articleId'
+})
 
 
 
+db.shoppingCart.hasMany(db.commande);
+db.commande.belongsTo(db.shoppingCart)
 
+db.shoppingCart.belongsTo(db.user)
+db.user.hasOne(db.shoppingCart)
+
+
+db.commande.belongsToMany(db.cartItem, {
+    through: db.orderItem,
+    foreignKey: 'commandeId',
+    otherKey: 'cartItemId'
+})
+db.cartItem.belongsToMany(db.commande, {
+    through: db.orderItem,
+    foreignKey: 'cartItemId',
+    otherKey: 'commandeId'
+})
 
 db.ROLES = ['admin', 'user', 'moderator'];
 

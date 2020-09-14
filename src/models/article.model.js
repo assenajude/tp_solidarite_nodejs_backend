@@ -16,12 +16,16 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             defaultValue: 0
         },
-        prixArticle: {
+        prixReel: {
+            type: Sequelize.INTEGER,
+            defaultValue: 5
+        },
+        prixPromo: {
             type: Sequelize.INTEGER,
             defaultValue: 5
         },
         imageArticle: Sequelize.STRING,
-        aideVente: Sequelize.STRING
+        aide: Sequelize.BOOLEAN
     });
     return Article;
 }

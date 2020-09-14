@@ -10,10 +10,17 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE,
             defaultValue: Sequelize.NOW
         },
-        items: Sequelize.JSON,
         itemsLength: {
             type: Sequelize.INTEGER,
             defaultValue: 0
+        },
+        interet: {
+          type: Sequelize.FLOAT,
+          defaultValue: 0
+        },
+        fraisTransport: {
+          type: Sequelize.FLOAT,
+          defautValue: 0
         },
         montant: {
             type: Sequelize.INTEGER,

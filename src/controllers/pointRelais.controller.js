@@ -1,21 +1,21 @@
-const db  = require('../models');
+const db  = require('../models/index');
 const PointRelais = db.pointRelais;
-const AdresseLivraison = db.adresseLivraison;
+const Region = db.ville;
 
 const addPointRelais = async (req, res, next) => {
-    const idAdLivraison = req.body.adresseLivraisonId;
+    const idVille  = req.body.villeId;
     const newPoint = {
         nom: req.body.nom,
         contact: req.body.contact,
         adresse: req.body.adresse,
         email: req.body.email
     }
-
     try {
-        let adLivraison = await AdresseLivraison.findByPk(idAdLivraison);
-        if (!adLivraison) return res.status(404).send(`l'adresse de livraison d'id ${idAdLivraison} n'existe pas`)
-        const point = adLivraison.createPointRelais(newPoint);
-       return  res.satus(201).send(point)
+        let ville = await Region.findByPk(idVille);
+        if (!ville) return res.status(404).send(`la ville choisie n'existe pas `)
+       const pointRelais = await PointRelais.create(newPoint);
+        await pointRelais.setVille(ville)
+        res.status(201).send(pointRelais)
     } catch (e) {
         next(e.message)
     }

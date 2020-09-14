@@ -1,18 +1,16 @@
-
-module.exports =  (sequelize, Sequelize) => {
+module.exports = (sequelize, Sequelize) => {
     const CartItem = sequelize.define('cartItem', {
         id: {
-            type: Sequelize.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true
         },
-        designation: Sequelize.STRING,
-        quantite: {
-            type: Sequelize.INTEGER,
-            defaultValue:1
+        libelle: {
+            type: Sequelize.STRING,
+            max: 100
         },
-        price: Sequelize.INTEGER,
-        itemAmount: Sequelize.INTEGER
-    });
+        image: Sequelize.STRING,
+        prix: Sequelize.FLOAT
+    })
     return CartItem
 }

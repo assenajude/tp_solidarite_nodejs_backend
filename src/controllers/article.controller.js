@@ -12,9 +12,10 @@ createArticle = async (req, res, next) => {
         codeArticle: req.body.code,
         designArticle: req.body.designation,
         qteStock: req.body.quantite,
-        prixArticle: req.body.prix,
+        prixReel: req.body.prixReel,
+        prixPromo: req.body.prixPromo,
         imageArticle: lienImage,
-        aideVente: req.body.aide,
+        aide: req.body.aide,
         descripArticle: req.body.description
     };
     try {

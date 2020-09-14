@@ -10,10 +10,11 @@ module.exports = (sequelize, Sequelize) => {
             min: 2,
             max: 100
         },
-        distance: {
-            type: Sequelize.STRING
+        kilometrage: {
+            type: Sequelize.INTEGER,
+            defautValue: 0
         },
-        coutLivraison: {
+        coutKilo: {
             type: Sequelize.INTEGER,
             defaultValue: 0
         }
