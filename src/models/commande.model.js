@@ -6,10 +6,27 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
+        numero: {
+            type: Sequelize.STRING,
+            max: 100
+        },
         dateCmde: {
             type: Sequelize.DATE,
             defaultValue: Sequelize.NOW
         },
+        dateLivraisonDepart: Sequelize.DATE,
+        statusLivraison: {
+            type: Sequelize.STRING,
+            max: 50,
+            defaultValue: 'en cours'
+        },
+        statusAccord: {
+            type: Sequelize.STRING,
+            max: 50,
+            defaultValue: 'en cours de traitement'
+        },
+        dataLivraisonFinal:Sequelize.DATE,
+
         itemsLength: {
             type: Sequelize.INTEGER,
             defaultValue: 0
@@ -25,6 +42,14 @@ module.exports = (sequelize, Sequelize) => {
         montant: {
             type: Sequelize.INTEGER,
             defaultValue: 0
+        },
+        typeCmde: {
+            type: Sequelize.STRING,
+            max: 20
+        },
+        historique: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
 
     });

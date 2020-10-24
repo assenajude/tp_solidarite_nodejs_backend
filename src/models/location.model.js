@@ -26,7 +26,15 @@ module.exports = (sequelize, Sequelize) => {
         },
         imageLocation: Sequelize.STRING,
         debutLocation: Sequelize.DATE,
-        finLocation: Sequelize.DATE
+        finLocation: Sequelize.DATE,
+        nombreCaution: {
+            type: Sequelize.INTEGER,
+            defaultValue: 1
+        },
+        nombrePretendant: {
+            type: Sequelize.INTEGER,
+            defaultValue: 0
+        }
     });
 return Location;
 }

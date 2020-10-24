@@ -30,8 +30,8 @@ module.exports = (sequelize, Sequelize) => {
           type: Sequelize.STRING,
             max: 50
         },
-        avatar: Sequelize.STRING,
-        pieceIdentite: Sequelize.STRING
+        avatar: Sequelize.BLOB,
+        pieceIdentite: Sequelize.BLOB
 
     });
     return User;

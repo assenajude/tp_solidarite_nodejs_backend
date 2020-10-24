@@ -11,6 +11,11 @@ const userAdresseRoutes = require('../routes/userAdresse.routes')
 const regionRoutes  = require('../routes/region.routes');
 const villeRoutes = require('../routes/ville.routes')
 const orderRoutes = require('../routes/commande.routes')
+const factureRoutes = require('../routes/facture.routes')
+const trancheRoutes  = require('../routes/tranche.routes')
+const serviceRoutes = require('../routes/service.routes')
+const mainRoutes = require('../routes/main.routes')
+const contratRoutes = require('../routes/contrat.routes')
 
 module.exports = function routes(app) {
     app.use('/api/auth', authRoute);
@@ -26,5 +31,9 @@ module.exports = function routes(app) {
     app.use('/api/regions', regionRoutes);
     app.use('/api/villes', villeRoutes)
     app.use('/api/commandes', orderRoutes)
-
+    app.use('/api/factures', factureRoutes)
+    app.use('/api/tranches', trancheRoutes)
+    app.use('/api/services', serviceRoutes)
+    app.use('/api/mainDatas', mainRoutes)
+    app.use('/api/contrats', contratRoutes)
 }

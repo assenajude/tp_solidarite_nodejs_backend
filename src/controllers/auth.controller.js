@@ -14,17 +14,10 @@ signup = async (req, res, next) => {
     const newUser = {
         username: req.body.username,
         email: req.body.email,
-        nom: req.body.nom,
-        prenom: req.body.prenom,
-        phone: req.body.phone,
-        adresse: req.body.adresse,
-        avatar: req.body.avatar,
-        pieceIdentite: req.body.pieceIdentite,
         password: bcrypt.hashSync(req.body.password, 8)
     };
 
     try {
-        let roles = []
         let user = await User.create(newUser);
         if (req.body.roles) {
             const userRoles = await Role.findAll({
@@ -41,7 +34,7 @@ signup = async (req, res, next) => {
         res.status(201).send(` L'utilisateur a été créé avec succès`)
 
     } catch (error) {
-         res.status(500).send(`Impossible de creer l'utilisateur, il l'erreur suivant: ${error.message}`)
+
     }
 };
 
@@ -82,36 +75,16 @@ signin = async (req, res, next) => {
         roles.forEach(role => {
             authorities.push('ROLE_' + role.name.toUpperCase())
         })
-
          authToken = jwt.sign({
              id: user.id,
              username: user.username,
              email:user.email,
-             nom: user.nom,
-             prenom: user.prenom,
-             phone: user.phone,
-             adresse: user.adresse,
-             avatar: user.avatar,
-             pieceIdentite: user.pieceIdentite,
              roles: authorities
          }, jwtSecretConfig.secret, {
              expiresIn: 86400
          });
 
-
- /*       const selectedUser = {
-            username: user.username,
-            email:user.email,
-            nom: user.nom,
-            prenom: user.prenom,
-            phone: user.phone,
-            adresse: user.adresse,
-            avatar: user.avatar,
-            pieceIdentite: user.pieceIdentite,
-        }*/
         return res.status(200).send({
-           /* user: selectedUser,
-            roles: authorities,*/
             accessToken: authToken
         })
     } catch (e) {
@@ -119,6 +92,7 @@ signin = async (req, res, next) => {
         //next(e.message)
     }
 };
+
 
 module.exports = {
     signup,

@@ -43,6 +43,11 @@ db.region = require('./region.model')(sequelize, Sequelize);
 db.ville = require('./ville.model')(sequelize, Sequelize);
 db.orderItem = require('./orderItem.model')(sequelize, Sequelize);
 db.cartItem = require('./cartItem.model')(sequelize,Sequelize);
+db.facture = require('./facture.model')(sequelize, Sequelize);
+db.tranche = require('./tranche.model')(sequelize, Sequelize)
+db.service = require('./service.model')(sequelize, Sequelize)
+db.contrats = require('./contrat.model')(sequelize, Sequelize);
+db.livraison = require('./livraison.model')(sequelize, Sequelize);
 
 
 db.user.belongsToMany(db.role, {
@@ -148,6 +153,23 @@ db.cartItem.belongsToMany(db.commande, {
     foreignKey: 'cartItemId',
     otherKey: 'commandeId'
 })
+
+db.commande.hasOne(db.facture);
+db.facture.belongsTo(db.commande)
+
+db.facture.hasMany(db.tranche);
+db.tranche.belongsTo(db.facture)
+
+db.service.belongsTo(db.categorie)
+db.categorie.hasMany(db.service)
+
+db.livraison.belongsTo(db.commande)
+db.commande.hasMany(db.livraison)
+
+db.contrats.belongsTo(db.commande)
+db.commande.hasMany(db.contrats)
+
+
 
 db.ROLES = ['admin', 'user', 'moderator'];
 

@@ -1,5 +1,7 @@
 const db = require('../models/index');
 const Categorie = db.categorie;
+const Article = db.article
+const Location = db.location
 
 createCategorie = async (req, res, next) => {
     const newCategorie = {
@@ -17,6 +19,8 @@ createCategorie = async (req, res, next) => {
 };
 
 
+
+
 getAllCategories = async (req, res, next) => {
     try {
     const categories = await Categorie.findAll();
@@ -30,5 +34,5 @@ getAllCategories = async (req, res, next) => {
 
 module.exports = {
     createCategorie,
-    getAllCategories
+    getAllCategories,
 }

@@ -23,7 +23,9 @@ createPlan = async (req, res, next) => {
 
 getAllPlan = async (req, res, next) => {
     try {
-        const plans = await Plan.findAll();
+        const plans = await Plan.findAll({
+            include: [Payement]
+        });
         if (!plans) return res.status(404).send('Aucun plan trouvé')
         return res.status(200).send(plans);
     } catch (e) {
