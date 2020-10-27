@@ -60,7 +60,7 @@ const saveOrder = async (req, res, next) => {
        await order.reload({
            include: [UserAdresse, Plan, CartItem, Facture, Contrat]
        })
-       res.status(201).send(order)
+       res.send(order)
     } catch (e) {
         next(e.message)
 
@@ -68,12 +68,13 @@ const saveOrder = async (req, res, next) => {
 }
 
 deleteOrder = async (req, res, next) => {
-    const orderId = req.body.id
+    const orderId = req.body.orderId
     try {
         const order = await Commande.findByPk(orderId)
-        if(!order) return res.status(404).send(`La commande d'id ${orderId} que vous voulez supprimer n'existe pas`)
+        if(!order) return res.sendStatus(404).send(`La commande d'id ${orderId} que vous voulez supprimer n'existe pas`)
         await order.destroy()
-        res.status(200).send(order)
+        return res.sendStatus(200)
+
     } catch (e) {
         next(e.message)
     }
@@ -136,11 +137,36 @@ getAllOrder = async (req, res, next) => {
     }
 }
 
+createOrderContrat = async (req, res, next) => {
+    const orderId = req.body.orderId
+    const contratData = {
+        dateDebut: req.body.debut,
+        dateFin: req.body.fin,
+        dateCloture: req.body.cloture,
+        montant: req.body.montant,
+        mensualite: req.body.nbMensualite,
+        status: req.body.status
+    }
+
+    try{
+        let order = await Commande.findByPk(orderId)
+        if(!order) return res.status(404).send("La commande n'existe pas")
+        await order.createContrat(contratData)
+        const justUpdated = await order.reload({
+            include: [UserAdresse,Plan, CartItem, Facture, Contrat]
+        })
+        return res.status(200).send(justUpdated)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
 
 module.exports = {
     getOrdersByUser,
     saveOrder,
     getAllOrder,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    createOrderContrat
 }

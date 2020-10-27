@@ -11,7 +11,7 @@ createContrat = async (req, res, next) => {
     try {
         let order = await Commande.findByPk(orderId)
         if(!order) return res.status(`La commande d'id ${orderId} n'existe pas`)
-        await order.createContrat({
+        const newContrat = await order.createContrat({
             dateDebut: req.body.debut,
             dateFin: req.body.fin,
             dateCloture: req.body.cloture,
@@ -19,10 +19,10 @@ createContrat = async (req, res, next) => {
             mensualite: req.body.nbMensualite,
             status: req.body.status
         })
-        const justUpdated = await order.reload({
+        /*const justUpdated = await order.reload({
             include: [UserAdresse,Plan, CartItem, Facture, Contrat]
-        })
-        return res.status(201).send(justUpdated)
+        })*/
+        return res.status(201).send(newContrat)
     } catch (e) {
         next(e.message)
     }

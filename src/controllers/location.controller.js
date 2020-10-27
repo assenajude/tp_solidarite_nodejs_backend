@@ -13,13 +13,16 @@ addNewLocation = async (req, res, next) => {
         libelleLocation: req.body.libelle,
         descripLocation: req.body.description,
         adresseLocation: req.body.adresse,
-        coutLocation: req.body.cout,
+        coutPromo: req.body.coutPromo,
+        coutReel: req.body.coutReel,
         frequenceLocation: req.body.frequence,
         imageLocation: imageLocation,
         debutLocation: req.body.debut,
         finLocation: req.body.fin,
         nombreCaution: req.body.caution,
-        nombrePretendant: req.body.pretendant
+        nombrePretendant: req.body.pretendant,
+        qteDispo: req.body.dispo,
+        aide: req.body.aide
 
     };
 
@@ -33,7 +36,7 @@ addNewLocation = async (req, res, next) => {
             where: {
                 libelleLocation: req.body.libelle
             },
-            include: [{all: true}]
+            include: [Categorie]
         })
         res.status(201).send(newAdded)
     } catch (e) {

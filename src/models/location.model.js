@@ -16,7 +16,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             max: 100
         },
-        coutLocation: {
+        coutReel: {
+            type: Sequelize.INTEGER,
+            defaultValue: 5
+        },
+        coutPromo: {
             type: Sequelize.INTEGER,
             defaultValue: 5
         },
@@ -32,6 +36,14 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: 1
         },
         nombrePretendant: {
+            type: Sequelize.INTEGER,
+            defaultValue: 0
+        },
+        aide: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
+        qteDispo: {
             type: Sequelize.INTEGER,
             defaultValue: 0
         }

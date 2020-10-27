@@ -154,7 +154,10 @@ db.cartItem.belongsToMany(db.commande, {
     otherKey: 'commandeId'
 })
 
-db.commande.hasOne(db.facture);
+db.commande.hasOne(db.facture, {
+    foreignKey: 'commandeId',
+    onDelete: 'cascade'
+});
 db.facture.belongsTo(db.commande)
 
 db.facture.hasMany(db.tranche);
@@ -167,7 +170,11 @@ db.livraison.belongsTo(db.commande)
 db.commande.hasMany(db.livraison)
 
 db.contrats.belongsTo(db.commande)
-db.commande.hasMany(db.contrats)
+db.commande.hasMany(db.contrats, {
+    foreignKey: 'commandeId',
+    onDelete: 'cascade',
+
+})
 
 
 
