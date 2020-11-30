@@ -1,12 +1,12 @@
+require('dotenv').config()
 const jwt = require('jsonwebtoken');
-const authConfig = require('../../config/auth.config');
-const db = require('../models/index');
-const User = db.user;
+const db = require('../../db/models');
+const User = db.User
 
 verifyToken = (req, res, next) => {
     const token = req.headers['x-access-token'];
     if (!token) return res.status(403).send('Pas de jeton de securite dans la requete');
-    jwt.verify(token, authConfig.secret, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
         if (err) return res.status(401).send(`Vous n'êtes pas autorisé`);
         req.userId = decoded.id;
         next();

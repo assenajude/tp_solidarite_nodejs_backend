@@ -1,6 +1,6 @@
-const db = require('../models/index');
-const Payement = db.payement;
-const Plan = db.plan;
+const db = require('../../db/models/index');
+const Payement = db.Payement;
+const Plan = db.Plan;
 
 
 createPlan = async (req, res, next) => {
@@ -11,12 +11,16 @@ createPlan = async (req, res, next) => {
         nombreMensualite: req.body.mensualite,
         compensation: req.body.compensation,
     }
+    const transaction = await db.sequelize.transaction()
     try {
-        const payement = await Payement.findByPk(idPayement);
+        let payement = await Payement.findByPk(idPayement, {transaction});
         if (!payement) return res.status(404).send(`Le payement d'id ${idPayement} n'a pas été trouvé`)
-        const plan = await payement.createPlan(newPlan);
+
+        const  plan = await payement.createPlan(newPlan, {transaction});
+        await transaction.commit()
         return res.status(201).send(plan);
     } catch (e) {
+        await transaction.rollback()
         next(e.message)
     }
 };

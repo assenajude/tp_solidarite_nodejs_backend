@@ -1,9 +1,11 @@
 const decoder = require('jwt-decode')
-const db = require('../models/index')
+const db = require('../../db/models/index')
 const Op = db.Sequelize.Op
-const Facture = db.facture
-const Commande = db.commande
-const Tranche = db.tranche
+const Facture = db.Facture
+const Commande = db.Commande
+const Tranche = db.Tranche
+const User = db.User
+const CartItem = db.CartItem
 
 const createFacture = async (req, res, next)=> {
     try {
@@ -27,11 +29,23 @@ const createFacture = async (req, res, next)=> {
 
 updateFacture = async (req, res, next) => {
     try {
-        let facture = await Facture.findByPk(req.body.id)
+        const data = req.body
+        let facture = await Facture.findByPk(data.id)
         if(!facture) return res.status(404).send(`La facture d'id ${req.body.id} n'a pas été trouée`)
-        facture.solde = req.body.montant
+        facture.solde += data.solde
+        const ratio = facture.solde / facture.montant
+        facture.ratio = ratio
+        //facture.ratio = Number(ratio.toFixed(2))
+        if(facture.solde === facture.montant) {
+           facture.dateCloture = Date.now()
+           facture.ratio = 1
+           facture.status = 'soldé'
+        }
         await facture.save()
-        return res.status(200).send(facture)
+        const justUpdated = await Facture.findByPk(facture.id, {
+            include: Tranche
+        })
+        return res.status(200).send(justUpdated)
     } catch (e) {
         next(e.message)
     }
@@ -58,18 +72,26 @@ getUserFactures = async (req,res, next) => {
         user = decoder(token)
     } else return res.status(404).send('Utilisateur non connecté')
     try{
-        const allOrders = await Commande.findAll({
-            where: {userId: user.id}
-        })
-        const ordersIds = allOrders.map(item => item.id)
-        const userFactures = await Facture.findAll({
+        const conncetedUser = await User.findByPk(user.id)
+       /* const userCommandes = await Commande.findAll({
             where: {
-                commandeId: {
-                    [Op.in]: ordersIds
-                }
+                UserId: user.id
             },
-            include: [Commande, Tranche]
-        })
+            include: [Facture]
+        })*/
+
+       const userOrders = await Commande.findAll({
+           where: {UserId: user.id}
+       })
+        const userOrdersIds = userOrders.map(order => order.id)
+        const userFactures = await Facture.findAll({
+           where: {
+               CommandeId: {
+                   [Op.in]: userOrdersIds
+               }
+           },
+           include: [Commande, Tranche]
+       })
 
         res.status(200).send(userFactures)
     }catch (e) {

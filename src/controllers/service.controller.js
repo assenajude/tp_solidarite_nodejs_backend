@@ -1,24 +1,34 @@
-const db = require('../models/index')
-const Categorie = db.categorie
-const Service = db.service
+const db = require('../../db/models')
+const Categorie = db.Categorie
+const Service = db.Service
 
 const createService = async (req, res, next) => {
-    let image = ''
     try{
         let categorie = await Categorie.findByPk(req.body.categoryId)
         if(!categorie) return res.status(404).send(`La categorie d'id ${req.body.categoryId} n'existe pas`)
-        if (req.file) {
-            image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        let imagesTab = []
+        if (req.files) {
+            req.files.forEach(file => {
+            const image = `${req.protocol}://${req.get('host')}/images/${file.filename}`
+                imagesTab.push(image)
+            })
         }
-        const newService = await categorie.createService({
+        let newService = await Service.create({
             libelle: req.body.libelle,
             description: req.body.description,
-            imageService: image,
+            imagesService: imagesTab,
             montantMin: req.body.montantMin,
-            montantMax: req.body.montantMax
+            montantMax: req.body.montantMax,
+            isDispo: req.body.isDispo
         })
-        const added = await newService.reload()
-        const newAdded = await Service.findByPk(added.id, {
+        await newService.setCategorie(categorie)
+
+        const allServices = await Service.findAll()
+        const serviceLength = allServices.length
+        newService.codeService = `SVC000${serviceLength}`
+        await newService.save()
+        const newAdded = await Service.findOne({
+            where: {id: newService.id},
             include: Categorie
         })
         return res.status(201).send(newAdded)

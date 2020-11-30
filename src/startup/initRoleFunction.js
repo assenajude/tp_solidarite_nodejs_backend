@@ -1,5 +1,5 @@
-const db = require('../models/index');
-const Role = db.role;
+const db = require('../../db/models');
+const Role = db.Role;
 
 function initRole() {
     Role.create({

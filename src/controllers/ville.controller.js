@@ -1,7 +1,7 @@
-const db = require('../models/index');
-const Region = db.region;
-const Ville = db.ville
-const Relais = db.pointRelais
+const db = require('../../db/models');
+const Region = db.Region;
+const Ville = db.Ville
+const Relais = db.PointRelais
 
 const addVille = async (req, res, next) => {
     const idRegion = req.body.regionId;

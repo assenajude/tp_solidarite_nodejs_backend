@@ -1,10 +1,6 @@
-const db = require('../models/index')
-const Commande = db.commande;
-const Contrat = db.contrats
-const UserAdresse = db.userAdresse
-const Plan = db.plan
-const CartItem = db.cartItem
-const Facture = db.facture
+const db = require('../../db/models')
+const Commande = db.Commande;
+
 
 createContrat = async (req, res, next) => {
     const orderId = req.body.orderId

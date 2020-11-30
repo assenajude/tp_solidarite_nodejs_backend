@@ -1,7 +1,6 @@
-const db = require('../models/index');
-const Categorie = db.categorie;
-const Article = db.article
-const Location = db.location
+const db = require('../../db/models');
+const Categorie = db.Categorie;
+
 
 createCategorie = async (req, res, next) => {
     const newCategorie = {

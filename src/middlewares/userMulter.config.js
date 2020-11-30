@@ -1,17 +1,15 @@
 const multer = require('multer');
 
-const MIME_TYPES = {
-    'image/jpg':'jpg',
-    'image/jpeg':'jpg',
-    'image/png':'png'
-};
+const avatarConfig = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'avatars')
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toLocaleDateString() + '_' + file.originalname);
+    }
+});
 
-const multerFilter = (req, file, cb) => {
-    /*if (file.mimeType === 'image/png' || file.mimeType === 'image/jpeg' || file.mimeType === 'image/jpg') {
-        cb(null, true)
-    } else {
-        cb(null, false)
-    }*/
+const avatarFilter = (req, file, cb) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
         return cb(new Error('choisissez une image valide svp'))
     } else {
@@ -19,4 +17,4 @@ const multerFilter = (req, file, cb) => {
     }
 }
 
-module.exports = multer({fileFilter: multerFilter}).single('image')
+module.exports = multer({storage: avatarConfig, fileFilter: avatarFilter}).array('images', 2)

@@ -5,16 +5,20 @@ const mainUserCtrl = require('../controllers/user.controller')
 const veriryToken = require('../middlewares/auth.jwt')
 const userMuler = require('../middlewares/userMulter.config')
 
-router.get('/allAccess', userCtrl.allAccess);
+// router.get('/allAccess', userCtrl.allAccess);
+//
+// router.get('/userAccess', [veriryToken.verifyToken], userCtrl.userBoard);
+//
+// router.get('/mederatorAccess',[veriryToken.verifyToken, veriryToken.isModerator],userCtrl.moderatorBoard);
+//
+// router.get('/adminAccess',[veriryToken.verifyToken, veriryToken.isAdmin],userCtrl.adminBoard);
 
-router.get('/userAccess', [veriryToken.verifyToken], userCtrl.userBoard);
-
-router.get('/mederatorAccess',[veriryToken.verifyToken, veriryToken.isModerator],userCtrl.moderatorBoard);
-
-router.get('/adminAccess',[veriryToken.verifyToken, veriryToken.isAdmin],userCtrl.adminBoard);
-
-router.patch('/users/me/avatar',veriryToken.verifyToken,userMuler, mainUserCtrl.addUserAvatar )
-router.patch('/users/me/piece', [veriryToken.verifyToken],userMuler, mainUserCtrl.addUserPiece )
-router.patch('/users/me/update', [veriryToken.verifyToken],userMuler, mainUserCtrl.updateProfile)
+router.patch('/me/avatar',[veriryToken.verifyToken,userMuler], mainUserCtrl.addUserAvatar )
+router.get('/me/avatar',veriryToken.verifyToken, mainUserCtrl.getUserProfileAvatar)
+router.get('/me',veriryToken.verifyToken, mainUserCtrl.getConnectedUserData)
+router.patch('/me/piece', [veriryToken.verifyToken,userMuler], mainUserCtrl.addUserPiece )
+router.patch('/me/update', [veriryToken.verifyToken], mainUserCtrl.updateProfile)
+router.get('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.getUserFavoris)
+router.patch('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.toggleUserFavoris)
 
 module.exports = router

@@ -1,16 +1,17 @@
-const db = require('../models/index')
-const Article = db.article;
-const Location = db.location
-const Categorie = db.categorie
+const db = require('../../db/models')
+const Article = db.Article;
+const Location = db.Location
+const Categorie = db.Categorie
+const ProductOption = db.ProductOption
 
 getAllData = async (req, res, next) => {
     try{
         const articles = await Article.findAll({
-            include: Categorie
+            include: [Categorie, ProductOption]
         })
 
         const locations = await Location.findAll({
-            include: Categorie
+            include: [Categorie, ProductOption]
         })
 
         const allData = articles.concat(locations)

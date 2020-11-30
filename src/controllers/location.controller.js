@@ -1,13 +1,17 @@
-const db = require('../models/index');
-const Categorie = db.categorie;
-const Location = db.location
+const db = require('../../db/models/index');
+const Categorie = db.Categorie;
+const Location = db.Location
+const ProductOption = db.ProductOption
 
 addNewLocation = async (req, res, next) => {
-    let imageLocation = '';
+    const idCategorie = req.body.categoryId
     let locationLength = 0
-    try {
-    if(req.file) {
-        imageLocation = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    let imagesTab = []
+    if(req.files) {
+        req.files.forEach(file => {
+        const imageLocation = `${req.protocol}://${req.get('host')}/images/${file.filename}`
+            imagesTab.push(imageLocation)
+        })
     }
     const newLocation = {
         libelleLocation: req.body.libelle,
@@ -16,7 +20,7 @@ addNewLocation = async (req, res, next) => {
         coutPromo: req.body.coutPromo,
         coutReel: req.body.coutReel,
         frequenceLocation: req.body.frequence,
-        imageLocation: imageLocation,
+        imagesLocation: imagesTab,
         debutLocation: req.body.debut,
         finLocation: req.body.fin,
         nombreCaution: req.body.caution,
@@ -25,21 +29,24 @@ addNewLocation = async (req, res, next) => {
         aide: req.body.aide
 
     };
-
-        let categorie = await Categorie.findByPk(req.body.categoryId);
+    const transaction = await db.sequelize.transaction()
+    try {
+        let categorie = await Categorie.findByPk(idCategorie, {transaction});
         if (!categorie) return res.status(404).send(`La categorie d'id ${idCategorie} n'existe pas`)
-        const location = await categorie.createLocation(newLocation);
-        const allLocation = await Location.findAll()
+        let location = await Location.create(newLocation, {transaction});
+        await location.setCategorie(categorie, {transaction})
+        const allLocation = await Location.findAll({transaction})
         locationLength = allLocation.length
         location.codeLocation = `LOC000${locationLength}`
-        const newAdded = Location.findOne({
-            where: {
-                libelleLocation: req.body.libelle
-            },
-            include: [Categorie]
+        await location.save({transaction})
+        const newAdded = await Location.findByPk(location.id,{
+            include: [Categorie, ProductOption],
+            transaction
         })
-        res.status(201).send(newAdded)
+        await transaction.commit()
+      return res.status(201).send(newAdded)
     } catch (e) {
+        await transaction.rollback()
         next (e.message)
     }
 };
@@ -47,7 +54,7 @@ addNewLocation = async (req, res, next) => {
 getAllLocations = async (req, res, next) => {
     try{
         const locations = await Location.findAll({
-            include: Categorie
+            include: [Categorie, ProductOption]
         })
         return res.status(200).send(locations)
     } catch (e) {

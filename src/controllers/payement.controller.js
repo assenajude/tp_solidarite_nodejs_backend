@@ -1,14 +1,17 @@
-const db = require('../models/index');
-const Payement = db.payement;
-const Plan = db.plan
+const db = require('../../db/models/index');
+const Payement = db.Payement;
+const Plan = db.Plan
 
 addPayement =  async (req, res, next) => {
+    const transaction = await db.sequelize.transaction()
     try {
         const payement = await Payement.create({
             mode: req.body.mode
-        });
+        }, {transaction});
+        await transaction.commit()
         return res.status(201).send(payement)
     } catch (e) {
+        await transaction.rollback()
         next(e.message)
     }
 }

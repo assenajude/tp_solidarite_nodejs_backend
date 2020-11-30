@@ -1,8 +1,9 @@
-const db = require('../models/index')
-const Facture = db.facture
-const Tranche = db.tranche
+const db = require('../../db/models')
+const Facture = db.Facture
+const Tranche = db.Tranche
 
 const createTranche = async (req, res, next) => {
+    console.log(req.body)
     const factureId = req.body.factureId
     try{
         let facture = await Facture.findByPk(factureId)
@@ -13,6 +14,7 @@ const createTranche = async (req, res, next) => {
             montant: req.body.montant
         }
         let newTranche = await facture.createTranche(trancheData)
+         // await newTranche.setFacture(facture)
         const factureTranches = await facture.getTranches()
         newTranche.numero = `${facture.numero}TRCH${factureTranches.length}`
         await newTranche.save()
@@ -24,15 +26,12 @@ const createTranche = async (req, res, next) => {
 
 updateTranche = async (req, res, next) => {
     try {
-        let facture = await Facture.findByPk(req.body.factureId)
-        if(!facture)return res.status(404).send(`Impossible de trouver la facture d'id ${req.body.factureId}`)
         let tranche = await Tranche.findByPk(req.body.id)
         if(!tranche)return res.status(404).send(`Impossible de trouver la tranche d'id ${req.body.id}`)
         await tranche.update({
             solde: req.body.montant,
             payed: true
         })
-        await facture.increment('solde', {by:req.body.montant})
         res.status(200).send(tranche)
     } catch (e) {
         next(e.message)

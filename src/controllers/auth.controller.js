@@ -1,8 +1,9 @@
-const db = require('../models/index');
-const jwtSecretConfig = require('../../config/auth.config')
+require('dotenv').config()
+const db = require('../../db/models');
 const Op = db.Sequelize.Op;
-const User = db.user;
-const Role = db.role;
+const User = db.User;
+const Role = db.Role;
+
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -34,7 +35,7 @@ signup = async (req, res, next) => {
         res.status(201).send(` L'utilisateur a été créé avec succès`)
 
     } catch (error) {
-
+        next(error.message)
     }
 };
 
@@ -79,13 +80,16 @@ signin = async (req, res, next) => {
              id: user.id,
              username: user.username,
              email:user.email,
-             roles: authorities
-         }, jwtSecretConfig.secret, {
+             roles: authorities,
+             avatar: user.avatar
+         }, process.env.JWT_KEY, {
              expiresIn: 86400
          });
 
+        //res.set('Content-Type', 'image/png')
         return res.status(200).send({
-            accessToken: authToken
+            accessToken: authToken,
+            avatar: user.avatar
         })
     } catch (e) {
         return res.status(500).send(e.message)
