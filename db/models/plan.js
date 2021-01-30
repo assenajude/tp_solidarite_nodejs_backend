@@ -25,7 +25,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     compensation: {
       type: DataTypes.FLOAT,
-    defaultValue: 0}
+    defaultValue: 0
+    },
+    imagesPlan: {
+      type: DataTypes.ARRAY(DataTypes.STRING)
+    }
   }, {
     sequelize,
     modelName: 'Plan',

@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'commandeId'
       })
     }
+
   };
   CartItem.init({
     id: {
@@ -24,25 +25,29 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    libelle: DataTypes.STRING,
-    image: DataTypes.STRING,
-    prix: {
+    shoppingCartId: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      unique: 'tt_unique_constraint'
     },
+    itemId: {
+      type: DataTypes.INTEGER,
+      unique: 'tt_unique_constraint',
+      references: null
+    },
+    itemType: {
+      type: DataTypes.STRING,
+      unique: 'tt_unique_constraint'
+    },
+
     quantite: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
-    montant: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
+    prix: DataTypes.INTEGER,
+    montant: DataTypes.INTEGER,
     couleur: DataTypes.STRING,
     taille: DataTypes.STRING,
-    montantMin: DataTypes.INTEGER,
-    montantMax: DataTypes.INTEGER,
-    typeCmde: DataTypes.STRING
+    modele: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'CartItem',

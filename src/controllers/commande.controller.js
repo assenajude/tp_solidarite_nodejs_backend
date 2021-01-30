@@ -5,6 +5,7 @@ const sendMail = require('../utilities/sendEmail')
 const Commande = db.Commande;
 const UserAdresse = db.UserAdresse;
 const Plan = db.Plan;
+const Payement = db.Payement
 const User = db.User
 const CartItem = db.CartItem
 const Facture = db.Facture
@@ -12,19 +13,25 @@ const Contrat = db.Contrat
 const ShoppingCart = db.ShoppingCart
 const Article = db.Article
 const Location = db.Location
-const Service = db.Service
-const Op = db.Sequelize.Op
 
 
 const saveOrder = async (req, res, next) => {
-    const token = req.headers['x-access-token']
-      const connectedUser = decoder(token)
     try{
+    const token = req.headers['x-access-token']
+        if(token=== 'null' || !token) return res.status(404).send('Impossible de passer la commande')
+      const connectedUser = decoder(token)
         let items = []
+        let statusAccord = '';
         let user = await User.findByPk(connectedUser.id)
         if(!user) return res.status(404).send("l'utlisateur n'a pas été trouvé")
         const userAdresse = await UserAdresse.findByPk(req.body.userAdresseId, )
-        const plan = await Plan.findByPk(req.body.planId)
+        const plan = await Plan.findByPk(req.body.planId, {include: Payement})
+        const modePayement = plan.Payement.mode
+        if(modePayement.toLowerCase() === 'cash') {
+            statusAccord = 'Accepté'
+        } else {
+            statusAccord = 'traitement en cours'
+        }
         const allSaved = await Commande.findAll();
         const orderCounter = allSaved.length++
 
@@ -35,7 +42,8 @@ const saveOrder = async (req, res, next) => {
            fraisTransport: req.body.fraisTransport,
            montant: req.body.montant,
            dateLivraisonDepart: req.body.dateLivraisonDepart,
-           typeCmde: req.body.typeCmde
+           typeCmde: req.body.typeCmde,
+           statusAccord
        })
         if(userAdresse) {
             await order.setUserAdresse(userAdresse)
@@ -60,14 +68,15 @@ const saveOrder = async (req, res, next) => {
                            image: item.image,
                            prix: item.prix,
                            quantite: item.quantite,
-                           montant: item.montant
+                           montant: item.montant,
+
                        }
                    })
                })(newItem)
            })(i)
        }
 
-        if(order.typeCmde === 'e-commerce') {
+        if(order.typeCmde === 'article') {
             for(let i = 0; i < items.length; i++) {
                 (function (i) {
                 let newItem = items[i];
@@ -79,7 +88,7 @@ const saveOrder = async (req, res, next) => {
                 })(i)
             }
             await userShoppingCart.setArticles([])
-        } else if(order.typeCmde === 'e-location') {
+        } else if(order.typeCmde === 'location') {
             let selectedLocation = await Location.findByPk(items[0].id)
             selectedLocation.qteDispo -= items[0].quantite
             await selectedLocation.save()
@@ -104,13 +113,12 @@ const saveOrder = async (req, res, next) => {
 }
 
 deleteOrder = async (req, res, next) => {
-    const orderId = req.body.orderId
+    const item = req.body
     try {
-        const order = await Commande.findByPk(orderId)
-        if(!order) return res.sendStatus(404).send(`La commande d'id ${orderId} que vous voulez supprimer n'existe pas`)
+        const order = await Commande.findByPk(item.id)
+        if(!order) return res.sendStatus(404).send(`La commande d'id ${item.id} que vous voulez supprimer n'existe pas`)
         await order.destroy()
-        return res.sendStatus(200)
-
+        return res.status(200).send(item)
     } catch (e) {
         next(e.message)
     }
@@ -120,7 +128,6 @@ updateOrder = async (req, res, next) => {
     try{
         let order = await Commande.findByPk(req.body.orderId)
         if(!order) return res.status(404).send(`La commande que voulez modifier n'exite pas`)
-
 
         if (req.body.statusAccord) {
         order.statusAccord = req.body.statusAccord
@@ -132,8 +139,11 @@ updateOrder = async (req, res, next) => {
         if(req.body.history) {
             order.historique = req.body.history
         }
+        if(req.body.isExpired) {
+            order.isExpired = req.body.isExpired
+        }
         await order.save()
-        const updatedOrder = await order.reload({
+        const updatedOrder = await Commande.findByPk(order.id, {
             include: [UserAdresse, Plan, CartItem, Facture, Contrat]
         })
         return res.status(200).send(updatedOrder)
@@ -143,10 +153,12 @@ updateOrder = async (req, res, next) => {
 }
 
 getOrdersByUser = async (req,res, next) => {
-    const token = req.headers['x-access-token']
-    const user = decoder(token)
     const transaction = await db.sequelize.transaction()
     try{
+
+    const token = req.headers['x-access-token']
+        if(token === 'null') return res.status(200).send([])
+    const user = decoder(token)
         const userOrders = await Commande.findAll({
             where: {UserId: user.id},
             include: [{all: true}],
@@ -161,7 +173,6 @@ getOrdersByUser = async (req,res, next) => {
 }
 
 getAllOrder = async (req, res, next) => {
-   // const transaction = await db.sequelize.transaction()
     try {
     const orders = await Commande.findAll({
         where: {userId: 1 },
@@ -169,10 +180,8 @@ getAllOrder = async (req, res, next) => {
                  UserAdresse,Plan, CartItem, Facture, Contrat
         ],
     })
-        // await transaction.commit()
         res.status(200).send(orders)
     } catch (e) {
-        // await transaction.rollback()
         next(e.message)
     }
 }
@@ -192,7 +201,7 @@ createOrderContrat = async (req, res, next) => {
         let order = await Commande.findByPk(orderId)
         if(!order) return res.status(404).send("La commande n'existe pas")
         await order.createContrat(contratData)
-        const justUpdated = await order.reload({
+        const justUpdated = await Commande.findByPk(orderId,{
             include: [UserAdresse,Plan, CartItem, Facture, Contrat]
         })
         return res.status(200).send(justUpdated)

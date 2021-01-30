@@ -3,7 +3,6 @@ const Article = db.Article;
 const Categorie = db.Categorie;
 const ProductOption = db.ProductOption
 
-
 createArticle = async (req, res, next) => {
     const idCategorie = req.body.categorieId;
     let incrementArticle = 0

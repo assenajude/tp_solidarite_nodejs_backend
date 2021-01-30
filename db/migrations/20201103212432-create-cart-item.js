@@ -3,34 +3,29 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('CartItems', {
       id: {
-        allowNull: false,
+        type: Sequelize.INTEGER,
         autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+        primaryKey: true
       },
-      libelle: {
-        type: Sequelize.STRING
+      shoppingCartId: {
+        type: Sequelize.INTEGER,
+        unique: 'tt_unique_constraint'
       },
-      image: {
-        type: Sequelize.STRING
+      itemId: {
+        type: Sequelize.INTEGER,
+        unique: 'tt_unique_constraint',
+        references: null
       },
-      prix: {
-        type: Sequelize.INTEGER
+      itemType: {
+        type: Sequelize.STRING,
+        unique: 'tt_unique_constraint'
       },
-      articleId: {
-        type: Sequelize.INTEGER
-      },
-      locationId: {
-        type: Sequelize.INTEGER
-      },
-      serviceId: {
-        type: Sequelize.INTEGER
-      },
+      quantite: Sequelize.INTEGER,
+      prix: Sequelize.INTEGER,
+      montant: Sequelize.INTEGER,
       couleur: Sequelize.STRING,
       taille: Sequelize.STRING,
-      montantMin: Sequelize.INTEGER,
-      montantMax: Sequelize.INTEGER,
-      typeCmde: Sequelize.STRING,
+      modele: Sequelize.STRING,
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

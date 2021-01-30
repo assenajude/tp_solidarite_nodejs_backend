@@ -20,6 +20,9 @@ module.exports = {
       compensation: {
         type: Sequelize.FLOAT
       },
+      imagesPlan: {
+        type: Sequelize.ARRAY(Sequelize.STRING)
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

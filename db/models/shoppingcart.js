@@ -4,6 +4,12 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class ShoppingCart extends Model {
+    async getContents(options){
+      const articles = await this.getArticles(options)
+      const locations = await this.getLocations(options)
+      const services = await this.getServices(options)
+      return articles.concat(locations, services)
+    }
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,19 +19,28 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       ShoppingCart.belongsTo(models.User)
       ShoppingCart.belongsToMany(models.Article, {
-        through: models.CartItem,
+        through: {
+          model: models.CartItem,
+          unique: false
+        },
         foreignKey: 'shoppingCartId',
-        otherKey: 'articleId'
+        constraints: false
       })
       ShoppingCart.belongsToMany(models.Location, {
-        through: models.CartItem,
+        through: {
+          model: models.CartItem,
+          unique: false
+        },
         foreignKey: 'shoppingCartId',
-        otherKey: 'locationId'
+        constraints: false
       })
       ShoppingCart.belongsToMany(models.Service, {
-        through: models.CartItem,
+        through: {
+          model: models.CartItem,
+          unique: false
+        },
         foreignKey: 'shoppingCartId',
-        otherKey: 'serviceId'
+        constraints: false
       })
     }
   };

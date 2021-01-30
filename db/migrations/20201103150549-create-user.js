@@ -17,6 +17,13 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
+      profession: Sequelize.STRING,
+      domaine: Sequelize.STRING,
+      statusEmploi: Sequelize.STRING,
+      isHero: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

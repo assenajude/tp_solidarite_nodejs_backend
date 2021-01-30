@@ -26,7 +26,9 @@ const addPointRelais = async (req, res, next) => {
 
 const getAllPoint = async (req, res, next) => {
     try {
-        const allPoints = await PointRelais.findAll();
+        const allPoints = await PointRelais.findAll({
+            include: Ville
+        });
         return res.status(200).send(allPoints)
     } catch (e) {
         next(e.message)

@@ -29,24 +29,21 @@ addNewLocation = async (req, res, next) => {
         aide: req.body.aide
 
     };
-    const transaction = await db.sequelize.transaction()
+    // const transaction = await db.sequelize.transaction()
     try {
-        let categorie = await Categorie.findByPk(idCategorie, {transaction});
+        let categorie = await Categorie.findByPk(idCategorie);
         if (!categorie) return res.status(404).send(`La categorie d'id ${idCategorie} n'existe pas`)
-        let location = await Location.create(newLocation, {transaction});
-        await location.setCategorie(categorie, {transaction})
-        const allLocation = await Location.findAll({transaction})
+        let location = await Location.create(newLocation);
+        await location.setCategorie(categorie)
+        const allLocation = await Location.findAll()
         locationLength = allLocation.length
         location.codeLocation = `LOC000${locationLength}`
-        await location.save({transaction})
+        await location.save()
         const newAdded = await Location.findByPk(location.id,{
-            include: [Categorie, ProductOption],
-            transaction
+            include: [Categorie, ProductOption]
         })
-        await transaction.commit()
       return res.status(201).send(newAdded)
     } catch (e) {
-        await transaction.rollback()
         next (e.message)
     }
 };

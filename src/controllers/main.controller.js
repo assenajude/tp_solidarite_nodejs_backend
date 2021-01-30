@@ -19,7 +19,6 @@ getAllData = async (req, res, next) => {
             if(b.createdAt < a.createdAt ) return -1
             if (b.createdAt > a.createdAt) return 1
             return 0;
-
         })
         return res.status(200).send(allData)
 
@@ -28,6 +27,23 @@ getAllData = async (req, res, next) => {
     }
 }
 
+const deleteItem = async (req, res, next) => {
+    const currentItem = req.body
+    let selectedItem;
+    try {
+        if(currentItem.Categorie.typeCateg === 'article') {
+            selectedItem = await Article.findByPk(currentItem.id)
+        } else {
+            selectedItem = await Location.findByPk(currentItem.id)
+        }
+        await selectedItem.destroy()
+        return res.status(200).send(currentItem)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
 module.exports = {
-    getAllData
+    getAllData,
+    deleteItem
 }

@@ -31,7 +31,7 @@ logger.rejections.handle(
 
 const corsOption = {
   origin: "*",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE"
 }
 
 app.use(cors(corsOption));

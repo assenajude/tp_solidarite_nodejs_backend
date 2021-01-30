@@ -13,9 +13,15 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Article.belongsTo(models.Categorie)
       Article.belongsToMany(models.ShoppingCart, {
-        through: models.CartItem,
-        foreignKey: 'articleId',
-        otherKey: 'shoppingCartId'
+        through: {
+          model: models.CartItem,
+          unique: false,
+          scope: {
+            itemType: 'article'
+          }
+        },
+        foreignKey: 'itemId',
+        constraints: false
       })
       Article.belongsToMany(models.User, {
         through: 'articles_favoris',

@@ -30,6 +30,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
     defaultValue: 0
     },
+    couleur: {
+      type: DataTypes.STRING
+    },
+    taille: {
+      type: DataTypes.STRING
+    },
+    modele: {
+      type: DataTypes.STRING
+    },
     montant: {
       type: DataTypes.INTEGER,
     defaultValue: 0}

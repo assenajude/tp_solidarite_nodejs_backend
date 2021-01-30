@@ -11,6 +11,15 @@ module.exports = {
       quantite: {
         type: Sequelize.INTEGER
       },
+      couleur: {
+       type: Sequelize.STRING
+      },
+      taille: {
+        type: Sequelize.STRING
+      },
+      modele: {
+        type: Sequelize.STRING
+      },
       montant: {
         type: Sequelize.INTEGER
       },

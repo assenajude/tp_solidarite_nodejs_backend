@@ -13,9 +13,15 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Service.belongsTo(models.Categorie)
       Service.belongsToMany(models.ShoppingCart, {
-        through: models.CartItem,
-        foreignKey: 'serviceId',
-        otherKey: 'shoppingCartId'
+        through: {
+          model: models.CartItem,
+          unique: false,
+          scope: {
+            itemType: 'service'
+          }
+        },
+        foreignKey: 'itemId',
+        constraints: false
       })
     }
   };

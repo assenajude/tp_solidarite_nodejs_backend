@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     statusAccord: {
       type: DataTypes.STRING,
-      defaultValue: "En cours de traitement"
+      defaultValue: "traitement en cours"
     },
     dateLivraisonFinal: DataTypes.DATE,
     itemsLength: {
@@ -59,6 +59,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     typeCmde: DataTypes.STRING,
     historique: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    isExpired: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     }

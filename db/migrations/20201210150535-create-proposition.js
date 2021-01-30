@@ -1,40 +1,34 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Articles', {
+    await queryInterface.createTable('Propositions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      codeArticle: {
+      designation: {
         type: Sequelize.STRING
       },
-      designArticle: {
+      description: {
+        type: Sequelize.ARRAY(Sequelize.JSON),
+      },
+      typeReference: {
         type: Sequelize.STRING
       },
-      descripArticle: {
-        type: Sequelize.STRING
-      },
-      qteStock: {
+      referenceId: {
         type: Sequelize.INTEGER
       },
-      prixReel: {
-        type: Sequelize.INTEGER
+      isOk: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
-      prixPromo: {
-        type: Sequelize.INTEGER
+      dateAchat: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
       },
-      imageArticle: {
-        type: Sequelize.STRING
-      },
-      aide: {
-        type: Sequelize.BOOLEAN
-      },
-      categoryId: {
-        type: Sequelize.INTEGER
-      },
+      imagesProposition: Sequelize.ARRAY(Sequelize.STRING),
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -46,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Articles');
+    await queryInterface.dropTable('Propositions');
   }
 };

@@ -2,43 +2,45 @@ const db = require('../../db/models')
 const Categorie = db.Categorie
 const Service = db.Service
 
-const createService = async (req, res, next) => {
-    try{
-        let categorie = await Categorie.findByPk(req.body.categoryId)
-        if(!categorie) return res.status(404).send(`La categorie d'id ${req.body.categoryId} n'existe pas`)
-        let imagesTab = []
-        if (req.files) {
-            req.files.forEach(file => {
-            const image = `${req.protocol}://${req.get('host')}/images/${file.filename}`
-                imagesTab.push(image)
-            })
-        }
-        let newService = await Service.create({
-            libelle: req.body.libelle,
-            description: req.body.description,
-            imagesService: imagesTab,
-            montantMin: req.body.montantMin,
-            montantMax: req.body.montantMax,
-            isDispo: req.body.isDispo
+createService = async (req, res, next) => {
+    const idCategorie = req.body.categoryId;
+    let incrementService = 0
+    let serviceImagesTab = []
+    if(req.files) {
+        req.files.forEach(file => {
+            const lienImage = `${req.protocol}://${req.get('host')}/images/${file.filename}`
+            serviceImagesTab.push(lienImage)
         })
-        await newService.setCategorie(categorie)
-
+    }
+    const serviceData = {
+        libelle: req.body.libelle,
+        description: req.body.description,
+        imagesService: serviceImagesTab,
+        montantMin: req.body.montantMin,
+        montantMax: req.body.montantMax,
+        isDispo: req.body.isDispo
+    }
+    try {
+        let categorie = await Categorie.findByPk(idCategorie);
+        if (!categorie) return res.status(404).send(`la categorie d'id ${idCategorie} n'a pas été trouvé`);
+        let service = await Service.create(serviceData);
+        await service.setCategorie(categorie)
         const allServices = await Service.findAll()
-        const serviceLength = allServices.length
-        newService.codeService = `SVC000${serviceLength}`
-        await newService.save()
-        const newAdded = await Service.findOne({
-            where: {id: newService.id},
+        incrementService = allServices.length
+        service.codeService = `SVC000${incrementService}`
+        await service.save()
+        const newService = await Service.findOne({
+            where: {id: service.id},
             include: Categorie
         })
-        return res.status(201).send(newAdded)
+        return res.status(201).send(newService)
     } catch (e) {
-        next(e.message)
+            next(e)
     }
 }
 
 
-const getServices = async (req, res, next) => {
+getServices = async (req, res, next) => {
     try{
         const services = await Service.findAll({
             include: Categorie

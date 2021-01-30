@@ -1,6 +1,6 @@
 const multer = require('multer');
 
-const avatarConfig = multer.diskStorage({
+const avatarStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'avatars')
     },
@@ -17,4 +17,4 @@ const avatarFilter = (req, file, cb) => {
     }
 }
 
-module.exports = multer({storage: avatarConfig, fileFilter: avatarFilter}).array('images', 2)
+module.exports = multer({storage: avatarStorage, fileFilter: avatarFilter}).array('images', 2)

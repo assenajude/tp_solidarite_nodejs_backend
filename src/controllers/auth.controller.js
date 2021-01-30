@@ -53,14 +53,7 @@ signin = async (req, res, next) => {
                 }
             })
         }
-/*        const user = await User.findOne({
-            where: {
-                [Op.or]: [
-                    {username: req.body.username},
-                    {email: req.body.email},
-                    ]
-            }
-        });*/
+
         if (!user) return res.status(404).send(`L'utilisateur n'a pas été trouvé`);
          const passwordValid = bcrypt.compareSync(
              req.body.password, user.password
@@ -88,8 +81,7 @@ signin = async (req, res, next) => {
 
         //res.set('Content-Type', 'image/png')
         return res.status(200).send({
-            accessToken: authToken,
-            avatar: user.avatar
+            accessToken: authToken
         })
     } catch (e) {
         return res.status(500).send(e.message)

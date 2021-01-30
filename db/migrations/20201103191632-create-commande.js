@@ -44,6 +44,9 @@ module.exports = {
       historique: {
         type: Sequelize.BOOLEAN
       },
+      isExpired: {
+        type: Sequelize.BOOLEAN
+      },
       userId: {
         type: Sequelize.INTEGER
       },

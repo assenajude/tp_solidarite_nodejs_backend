@@ -1,9 +1,6 @@
 const db = require('../../db/models/index')
 const Location = db.Location
 const Article = db.Article
-const Couleur = db.Couleur
-const Taille = db.Taille
-const ProductOption = db.ProductOption
 
 const addOption = async (req,res,next) => {
     const data = {
@@ -13,7 +10,7 @@ const addOption = async (req,res,next) => {
     }
     let updated;
     try {
-        if(req.body.type=== 'e-commerce') {
+        if(req.body.type=== 'article') {
             updated = await Article.findByPk(req.body.itemId)
             await updated.createProductOption(data, {
                 through: {
@@ -21,7 +18,7 @@ const addOption = async (req,res,next) => {
                     prix: req.body.prix
                 }
             })
-        } else  if(req.body.type ==='e-location') {
+        } else  if(req.body.type ==='location') {
             updated = await Location.findByPk(req.body.itemId)
             updated.createProductOption(data, {
                 through: {

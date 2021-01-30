@@ -5,7 +5,6 @@ const Facture = db.Facture
 const Commande = db.Commande
 const Tranche = db.Tranche
 const User = db.User
-const CartItem = db.CartItem
 
 const createFacture = async (req, res, next)=> {
     try {
@@ -67,19 +66,9 @@ getAllFactures = async (req, res, next) => {
 
 getUserFactures = async (req,res, next) => {
     const token = req.headers['x-access-token']
-    let user;
-    if(token) {
-        user = decoder(token)
-    } else return res.status(404).send('Utilisateur non connecté')
+    if(!token || token === 'null')return  res.status(404).send('Utilisateur non connecté')
     try{
-        const conncetedUser = await User.findByPk(user.id)
-       /* const userCommandes = await Commande.findAll({
-            where: {
-                UserId: user.id
-            },
-            include: [Facture]
-        })*/
-
+        const user = decoder(token)
        const userOrders = await Commande.findAll({
            where: {UserId: user.id}
        })

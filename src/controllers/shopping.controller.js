@@ -6,6 +6,7 @@ const CartItem = db.CartItem
 const Location = db.Location
 const Article = db.Article
 const Service = db.Service
+const Op = db.Sequelize.Op
 
 const addItemToCart = async (req, res, next) => {
     let cartItem;
@@ -13,46 +14,6 @@ const addItemToCart = async (req, res, next) => {
     const connectedUser = decoder(token)
     const item = req.body
     const typeCmde = item.typeCmde || item.Categorie.typeCateg
-    if(typeCmde === 'e-location') {
-            cartItem = {
-                id: item.id,
-                libelle: item.libelleLocation,
-                image: item.imagesLocation[0],
-                prix: item.prix || item.coutPromo,
-                couleur: item.couleur || '',
-                taille: item.taille || '',
-                modele: item.modele || '',
-                quantite: 1 ,
-                caution: item.nombreCaution,
-                montant: item.montant || +item.coutPromo * item.nombreCaution,
-                type: typeCmde
-            }
-
-    } else if(typeCmde === 'e-service') {
-            cartItem =  {
-                id: item.id,
-                libelle: item.libelle,
-                image: item.imagesService[0],
-                prix: 0,
-                quantite: 1,
-                montantMin: item.montantMin || 0,
-                montantMax: item.montantMax || 0,
-                montant: 0,
-                type: typeCmde
-            }
-        } else {
-        cartItem = {
-            id: item.id,
-            libelle: item.designArticle || item.designation ,
-            image: item.imagesArticle[0],
-            prix: item.prixPromo || item.prix,
-            quantite: item.quantite || 1,
-            montant: +item.montant || item.prixPromo  ,
-            couleur: item.couleur || '',
-            taille: item.taille || '',
-            type: typeCmde || item.Categorie.typeCateg,
-        }
-    }
     try {
         const user = await User.findByPk(connectedUser.id)
         let [shoppingCart, created] = await ShoppingCart.findOrCreate({
@@ -63,78 +24,78 @@ const addItemToCart = async (req, res, next) => {
             }
         })
         if(created) {
-          await shoppingCart.setUser(user)
+            await shoppingCart.setUser(user)
         }
+        if (typeCmde === 'article') {
+                const listArticles = await shoppingCart.getArticles()
+            const allItems = []
+            listArticles.forEach(item => {
+                allItems.push(item.dataValues)
+            })
+            let itemIndex = allItems.findIndex(article => article.id === item.id)
+            if(itemIndex >= 0) {
+                    const selectedItem = allItems[itemIndex]
+                let currentItem = await CartItem.findOne({
+                        where: {
+                            itemId: selectedItem.id
+                        }
+                    })
+                   currentItem.quantite++
+                    currentItem.montant += item.prixPromo
+                    await currentItem.save()
+                   shoppingCart.cartAmount+=item.prixPromo
+                    shoppingCart.cartLength++
+            } else {
+                    const selectedArticle = await Article.findByPk(item.id)
 
-          if(typeCmde === 'e-commerce') {
-              const cartItems = await CartItem.findAll({
-                shoppingCartId: shoppingCart.id,
-            })
-              let itemIndex = cartItems.findIndex(item => item.libelle === cartItem.libelle && item.couleur === cartItem.couleur && item.taille === cartItem.taille)
-             if(itemIndex >=0) {
-                 const selectedItem = cartItems[itemIndex]
-                 let currentItem = await CartItem.findByPk(selectedItem.id)
-                 currentItem.quantite+=cartItem.quantite
-                 currentItem.montant+=cartItem.montant
-                 await currentItem.save()
-                shoppingCart.cartAmount+=cartItem.montant
-                shoppingCart.cartLength+=cartItem.quantite
-                 cartItem = currentItem
-             } else {
-                 const selectedArticle = await Article.findByPk(item.id)
-                  await shoppingCart.addArticle(selectedArticle, {
-                    through: {
-                    libelle: cartItem.libelle,
-                    image: cartItem.image,
-                    prix: cartItem.prix,
-                    quantite: cartItem.quantite,
-                    montant: cartItem.montant,
-                    couleur: cartItem.couleur,
-                    taille: cartItem.taille,
-                    typeCmde: cartItem.type
+                     await selectedArticle.addShoppingCart(shoppingCart, {
+                        through: {
+                            quantite: item.quantite || 1,
+                            prix: item.prix || selectedArticle.prixPromo,
+                            couleur: item.couleur || '',
+                            taille: item.taille || '',
+                            modele: item.modele || '',
+                            montant: item.prix * item.quantite || selectedArticle.prixPromo * item.quantite || selectedArticle.prixPromo,
+                        }
+                    })
+                   shoppingCart.cartLength+=item.quantite || 1
+                    shoppingCart.cartAmount+= item.prix * item.quantite || selectedArticle.prixPromo * item.quantite || selectedArticle.prixPromo * 1
                 }
-            })
-                shoppingCart.cartLength+=cartItem.quantite
-                shoppingCart.cartAmount+=cartItem.montant
-                 const cartItems = await shoppingCart.getArticles()
-                 cartItem = cartItems.pop().CartItem
-             }
-        } else if(typeCmde === 'e-location') {
-              console.log(cartItem)
-              const selectedLocation = await Location.findByPk(item.id)
-              await shoppingCart.addLocation(selectedLocation, {
+             const updatedCartItems = await shoppingCart.getArticles()
+             cartItem = updatedCartItems.find(article => article.id === item.id)
+
+            }
+        if(typeCmde === 'location') {
+              let selectedLocation = await Location.findByPk(item.id)
+            const caution = selectedLocation.nombreCaution
+              await selectedLocation.addShoppingCart(shoppingCart, {
                 through: {
-                    libelle: cartItem.libelle,
-                    image: cartItem.image,
-                    prix: cartItem.prix,
                     quantite: 1,
-                    montant: cartItem.montant,
-                    couleur: cartItem.couleur,
-                    taille: cartItem.taille,
-                    typeCmde: cartItem.type
+                    prix: item.prix || selectedLocation.coutPromo,
+                    couleur: item.couleur || '',
+                    taille: item.taille || '',
+                    modele: item.modele || '',
+                    montant: item.prix || selectedLocation.coutPromo,
                 }
             })
             shoppingCart.cartLength = 1
-            shoppingCart.cartAmount = cartItem.montant
+            shoppingCart.cartAmount = item.prix * caution || selectedLocation.coutPromo * 4
+            const cartLocations = await shoppingCart.getLocations()
+            cartItem = cartLocations[0]
 
-        } else {
-              const selectedService = await Service.findByPk(item.id)
-              await shoppingCart.addService(selectedService, {
+        }
+        if(typeCmde === 'service'){
+              let selectedService = await Service.findByPk(item.id)
+               await selectedService.addShoppingCart(shoppingCart, {
                   through: {
-                      libelle: cartItem.libelle,
-                      image: cartItem.image,
-                      prix: cartItem.prix,
-                      quantite: 1,
-                      montant: cartItem.montant,
-                      montantMin: cartItem.montantMin,
-                      montantMax: cartItem.montantMax,
-                      typeCmde: cartItem.type
+                      quantite: 1
                   }
               })
-              const cartItems = await shoppingCart.getServices()
-              cartItem = cartItems.pop().CartItem
               shoppingCart.cartLength = 1
-              shoppingCart.cartAmount = cartItem.montant
+              shoppingCart.cartAmount = 0
+            const contents = await shoppingCart.getServices()
+            cartItem = contents[0]
+
           }
         await shoppingCart.save()
         return res.status(201).send(cartItem)
@@ -146,16 +107,24 @@ const addItemToCart = async (req, res, next) => {
 }
 
 incrementItemQuantity = async (req, res, next) => {
-    const item = req.body.item
+    const item = req.body
+    console.log(item);
     try {
-        let selectedItem = await CartItem.findByPk(item.id)
+        let selectedItem = await CartItem.findOne({
+            where: {
+                [Op.and]:[
+                    {shoppingCartId: item.shoppingCartId},
+                    {itemId: item.id}
+                    ]
+            }
+        })
         selectedItem.quantite+=1
         selectedItem.montant+=item.prix
         await selectedItem.save()
-
         let shoppingCart = await ShoppingCart.findByPk(item.shoppingCartId)
         shoppingCart.cartLength+=1
-        shoppingCart.cartAmount+=selectedItem.prix
+        shoppingCart.cartAmount+=item.prix
+        await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
         next(e.message)
@@ -163,16 +132,21 @@ incrementItemQuantity = async (req, res, next) => {
 }
 
 decrementItemQuantity = async (req, res, next) => {
-    const item = req.body.item
+    const item = req.body
     try {
-        let selectedItem = await CartItem.findByPk(item.id)
+        let selectedItem = await CartItem.findOne({
+            where: {
+                itemId: item.id,
+                shoppingCartId: item.shoppingCartId
+            }
+        })
         selectedItem.quantite-=1
         selectedItem.montant-=item.prix
-        const newItem = await selectedItem.save()
-
+        await selectedItem.save()
         let shoppingCart = await ShoppingCart.findByPk(item.shoppingCartId)
         shoppingCart.cartLength-=1
-        shoppingCart.cartAmount-=selectedItem.prix
+        shoppingCart.cartAmount-=item.prix
+        await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
         next(e.message)
@@ -182,10 +156,17 @@ decrementItemQuantity = async (req, res, next) => {
 updateItem = async (req, res, next) => {
     const item = req.body
     try {
-        let selectedItem = await CartItem.findByPk(item.id)
+        let selectedItem = await CartItem.findOne({
+            where: {
+                itemId: item.id
+            }
+        })
         selectedItem.prix = item.montant
         selectedItem.montant = item.montant
         await selectedItem.save()
+        let shoppingCart = await ShoppingCart.findByPk(item.shoppingCartId)
+        shoppingCart.cartAmount = item.montant
+        await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
         next(e.message)
@@ -196,19 +177,37 @@ updateItem = async (req, res, next) => {
 removeItem = async (req, res, next) => {
     const item = req.body
     try {
+        let selectedItem = await CartItem.findOne({
+            where: {
+              itemId: item.id
+            }
+        })
         let shoppingCart = await ShoppingCart.findByPk(item.shoppingCartId)
-        if(item.typeCmde === 'e-commerce') {
-            const selectedArticle = await Article.findByPk(item.articleId)
-            await shoppingCart.removeArticle(selectedArticle)
-        } else if(item.typeCmde ==='e-location') {
-            const selectedLocation = await Location.findByPk(item.locationId)
-            await shoppingCart.removeLocation(selectedLocation)
-        } else {
-            const selectedService = await Service.findByPk(item.serviceId)
-            await shoppingCart.removeService(selectedService)
-        }
-        shoppingCart.quantite -= item.quantite
-        shoppingCart.montant -= item.montant
+            if(item.typeCmde === 'article') {
+                    const selectedArticle = await Article.findByPk(item.id)
+                if(selectedItem.quantite === 1) {
+                    await selectedItem.destroy()
+                    await shoppingCart.removeArticle(selectedArticle)
+                } else {
+                    selectedItem.quantite--
+                    selectedItem.montant-=item.montant
+                    shoppingCart.cartLength -= item.quantite
+                    shoppingCart.cartAmount -= item.montant
+                    await selectedItem.save()
+                }
+
+            } else {
+                    await selectedItem.destroy()
+                    shoppingCart.cartLength = 0
+                    shoppingCart.cartAmount = 0
+                if(item.typeCmde === 'location') {
+                    const selectedLocation = await Location.findByPk(item.id)
+                    await shoppingCart.removeLocation(selectedLocation)
+                } else {
+                    const selectedService = await Service.findByPk(item.id)
+                    await shoppingCart.removeService(selectedService)
+                }
+            }
         await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
@@ -217,17 +216,36 @@ removeItem = async (req, res, next) => {
 }
 
 getCartItems = async (req, res, next) => {
-    const token = req.headers['x-access-token']
-    const connectedUser = decoder(token)
     try {
+        let allDatas;
+        const token = req.headers['x-access-token']
+        if(token === 'null') {
+            return res.status(200).send([])
+        }
+        const connectedUser = decoder(token)
         const userShoppingCart = await ShoppingCart.findOne({
-            UserId: connectedUser.id
+            where: {
+                UserId: connectedUser.id
+            }
         })
-        const cartArticles = await userShoppingCart.getArticles()
-        const cartLocations = await userShoppingCart.getLocations()
-        const cartServices = await userShoppingCart.getServices()
-        const allData = [...cartArticles, ...cartServices, ...cartLocations]
-        return res.status(200).send(allData)
+        if(!userShoppingCart) return res.status(200).send([])
+        const cartItems = await CartItem.findAll({
+            where: {shoppingCartId:userShoppingCart.id}
+        })
+        if(cartItems.length === 0) {
+            allDatas = []
+        } else {
+        const firstItemType = cartItems[0].itemType
+        if(firstItemType === 'article') {
+            allDatas = await userShoppingCart.getArticles()
+        } else if(firstItemType === 'location') {
+            allDatas = await userShoppingCart.getLocations()
+        } else {
+            allDatas = await userShoppingCart.getServices()
+        }
+
+        }
+        return res.status(200).send(allDatas)
     }catch (e) {
         next(e.message)
     }

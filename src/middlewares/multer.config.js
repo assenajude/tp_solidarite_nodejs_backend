@@ -30,4 +30,6 @@ const multerFilter = (req, file, cb) => {
     }
 }
 
+// module.exports = multer({storage: storage, fileFilter: multerFilter}).any()
 module.exports = multer({storage: storage, fileFilter: multerFilter}).array('images', 10)
+// module.exports = multer({storage: storage, fileFilter: multerFilter}).single('image')

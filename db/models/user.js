@@ -29,6 +29,12 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.UserAdresse)
       User.hasMany(models.Commande)
       User.hasOne(models.ShoppingCart)
+      User.belongsToMany(models.Proposition, {
+        through: 'Users_Propositions',
+        foreignKey: 'userId',
+        otherKey: 'propositionId'
+      })
+      User.hasMany(models.Question)
     }
   };
   User.init({
@@ -40,7 +46,14 @@ module.exports = (sequelize, DataTypes) => {
     phone: DataTypes.STRING,
     adresse: DataTypes.STRING,
     avatar: DataTypes.STRING,
-    pieceIdentite: DataTypes.STRING
+    pieceIdentite: DataTypes.STRING,
+    profession: DataTypes.STRING,
+    domaine: DataTypes.STRING,
+    statusEmploi: DataTypes.STRING,
+    isHero: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   }, {
     sequelize,
     modelName: 'User',

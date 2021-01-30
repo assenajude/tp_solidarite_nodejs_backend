@@ -1,14 +1,20 @@
-{"message":"authentification par mot de passe �chou�e pour l'utilisateur  � PAULIN KOUAKOU �","level":"error"}
-{"message":"authentification par mot de passe �chou�e pour l'utilisateur  � PAULIN KOUAKOU �","level":"error"}
-{"message":"authentification par mot de passe �chou�e pour l'utilisateur  � PAULIN KOUAKOU �","level":"error"}
-{"message":"connect ENETUNREACH 192.168.1.178:5432","level":"error"}
-{"message":"connect ENETUNREACH 192.168.1.178:5432","level":"error"}
-{"message":"connect ETIMEDOUT 192.168.1.178:5432","level":"error"}
-{"message":"connect ETIMEDOUT 192.168.137.202:5432","level":"error"}
-{"message":"connect ETIMEDOUT 192.168.137.11:5432","level":"error"}
-{"message":"connect EHOSTUNREACH 192.168.43.223:5432","level":"error"}
-{"message":"connect ENETUNREACH 192.168.43.223:5432","level":"error"}
-{"message":"il n'existe aucune contrainte unique correspondant aux clés données pour la table « Options » référencée","level":"error"}
-{"message":"connect ETIMEDOUT 192.168.137.194:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.137.29:5432","level":"error"}
+{"message":"connect ENETUNREACH 192.168.137.155:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.137.155:5432","level":"error"}
+{"message":"connect ENETUNREACH 192.168.8.101:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.101:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.101:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.101:5432","level":"error"}
+{"message":"connect ECONNABORTED 192.168.8.100:5432","level":"error"}
 {"message":"connect ETIMEDOUT 192.168.1.178:5432","level":"error"}
 {"message":"connect ETIMEDOUT 192.168.1.178:5432","level":"error"}
+{"message":"connect ECONNABORTED 192.168.1.178:5432","level":"error"}
+{"message":"il n'existe aucune contrainte unique correspondant aux clés données pour la table « CartItems » référencée","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.102:5432","level":"error"}
+{"message":"connect ECONNABORTED 192.168.8.101:5432","level":"error"}
+{"message":"connect EHOSTUNREACH 192.168.8.100:5432","level":"error"}
