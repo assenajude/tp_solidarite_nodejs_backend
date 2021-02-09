@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     typeCmde: DataTypes.STRING,
+    expireIn: {
+      type: DataTypes.STRING,
+      defaultValue: '3j 00h 00m 00s'
+    },
     historique: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

@@ -21,4 +21,5 @@ router.patch('/me/update', [veriryToken.verifyToken], mainUserCtrl.updateProfile
 router.get('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.getUserFavoris)
 router.patch('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.toggleUserFavoris)
 
+
 module.exports = router

@@ -63,6 +63,7 @@ db.sequelize.sync().then(() => {
 
 
 require('./src/startup/routes')(app);
+require('./src/startup/prod')(app)
 
 app.use(errorHandler)
 

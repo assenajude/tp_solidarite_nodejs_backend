@@ -13,7 +13,10 @@ const askQuestion = async (req, res, next) => {
         const newQuestion = await connectedUser.createQuestion({
             libelle: req.body.libelle
         })
-        return res.status(201).send(newQuestion)
+        const newAdded = await Question.findByPk(newQuestion.id, {
+            include: [Response, User]
+        })
+        return res.status(201).send(newAdded)
 
     } catch (e) {
         next(e.message)
@@ -58,9 +61,21 @@ const giveResponse = async (req, res, next) => {
     }
 }
 
+const deleteQuestion = async (req, res, next)=> {
+    const question = req.body
+    try {
+        const selectedQuestion = await Question.findByPk(question.id)
+        await selectedQuestion.destroy()
+        return res.status(200).send(question)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
 module.exports = {
     askQuestion,
     giveResponse,
     editQuestion,
-    getAllQuestions
+    getAllQuestions,
+    deleteQuestion
 }

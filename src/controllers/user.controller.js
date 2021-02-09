@@ -42,7 +42,7 @@ addUserAvatar = async (req, res, next) => {
         if (!req.files) {
             return res.status(400).send('Aucune image pour mettre a jour votre profil')
         } else {
-         lienAvatar = `${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
+         lienAvatar = req.body.deleting?null:`${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
         }
 
 
@@ -166,9 +166,79 @@ toggleUserFavoris = async (req, res, next) => {
     } catch (e) {
         next(e.message)
     }
+
+}
+/*
+
+const getUserMessage = async(req, res, next) => {
+    const token = req.headers['x-access-token']
+    const user = decoder(token)
+    try {
+        const connectedUser = await User.findByPk(user.id)
+        const userMessages = await Message.findAll({
+            where: {
+                [Op.or]:[
+                    {receiverId: connectedUser.id},
+                    {senderId: connectedUser.id}
+                    ]
+
+            },
+            include: MsgResponse
+        })
+        return res.status(200).send(userMessages)
+    } catch (e) {
+        next(e.message)
+    }
 }
 
+const getUserMessageRead = async (req, res, next) => {
+    try{
+        let selectedMessage = await Message.findByPk(req.body.messageId)
+        if(req.body.isRead) {
+        selectedMessage.isRead = req.body.isRead
+        }else {
+            selectedMessage.msgHeader = req.body.title
+            selectedMessage.content = req.body.message
+        }
+        await selectedMessage.save()
+        return res.status(200).send(selectedMessage)
+    } catch (e) {
+        next(e.message)
+    }
+}
 
+const sendMessageToToutPromo = async (req,res, next) => {
+    try{
+        const sender = await User.findByPk(req.body.userId)
+        const receiver = await User.findByPk(1)
+        let sentMessage = await Message.create({
+            msgHeader: req.body.title,
+            content: req.body.message
+        })
+        await sentMessage.setSender(sender)
+        await sentMessage.setReceiver(receiver)
+        return res.status(200).send(sentMessage)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
+const respondeToMsg = async (req, res, next)=> {
+    try{
+        let selectedMsg = await Message.findByPk(req.body.messageId)
+        await selectedMsg.createMsgResponse({
+            respHeader: req.body.title,
+            respContent: req.body.reponse
+        })
+        const newUpdated = await Message.findByPk(selectedMsg.id, {
+            include: MsgResponse
+        })
+        return res.status(200).send(newUpdated)
+    } catch (e) {
+        next(e.message)
+    }
+}
+*/
 module.exports = {
     updateProfile,
     addUserAvatar,

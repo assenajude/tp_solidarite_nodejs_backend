@@ -59,6 +59,10 @@ module.exports = {
       shoppingCartId: {
         type: Sequelize.INTEGER
       },
+      expireIn: {
+        type: Sequelize.STRING,
+        defaultValue: '3j 00h 00m 00s'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -5,15 +5,7 @@ const logger = createLogger({
     format: format.json(),
     transports: [
         new transports.File({filename: 'error.log', level: 'error'}),
-        //new winston.transports.File({filename: 'combined.log'}),
     ],
- /*   exceptionHandlers: [
-      new transports.File({filename: 'exceptions.log'})
-    ],
-    rejectionHandlers: [
-        new transports.File({filename: 'exceptions.log'})
-    ],*/
-
     exitOnError: false
 
 });

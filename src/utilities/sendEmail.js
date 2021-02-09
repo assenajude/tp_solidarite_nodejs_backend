@@ -1,5 +1,6 @@
 require('dotenv').config()
 const sgMail = require('@sendgrid/mail')
+const logger = require('../startup/logger')
 
 
 sgMail.setApiKey(process.env.SEND_EMAIL_KEY)
@@ -25,16 +26,7 @@ const orderSuccessMail = (user, items,frais, interet, montant) => {
                 }
             }
         ]
-        /*dynamic_template_data: {
-            username: user.username,
-            cartItems:items,
-            fraisTransport: frais,
-            interet: interet,
-            total: montant
-        }*/
-   /*     subject: `Félicitation!, ${user.username}`,
-        html: `Votre commande a été passée avec succès, le numero est <strong> ${commande.numero}<strong>`*/
-    }).catch(err => console.log(err))
+    }).catch(err => logger.error(err))
 
 }
 

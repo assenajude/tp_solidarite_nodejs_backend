@@ -17,9 +17,9 @@ const mainRoutes = require('../routes/main.routes')
 const contratRoutes = require('../routes/contrat.routes')
 const shoppingCartRoutes = require('../routes/shoppingCart.routes')
 const optionRoutes = require('../routes/option.routes')
-const colorAndSizeRoutes = require('../routes/colorAndSize.routes')
 const propositionRoutes  = require('../routes/proposition.route')
 const faqRoutes = require('../routes/faq.routes')
+const messageRoutes = require('../routes/message.routes')
 
 module.exports = function routes(app) {
     app.use('/api/auth', authRoute);
@@ -41,7 +41,7 @@ module.exports = function routes(app) {
     app.use('/api/contrats', contratRoutes)
     app.use('/api/shoppingCarts', shoppingCartRoutes)
     app.use('/api/options', optionRoutes)
-    app.use('/api/colorAndSize', colorAndSizeRoutes)
     app.use('/api/propositions', propositionRoutes)
     app.use('/api/faq', faqRoutes)
+    app.use('/api/messages', messageRoutes)
 }

@@ -13,6 +13,9 @@ const Contrat = db.Contrat
 const ShoppingCart = db.ShoppingCart
 const Article = db.Article
 const Location = db.Location
+const Message = db.Message
+const Livraison = db.Livraison
+const sendMessage = require('../utilities/sendMessage')
 
 
 const saveOrder = async (req, res, next) => {
@@ -33,10 +36,19 @@ const saveOrder = async (req, res, next) => {
             statusAccord = 'traitement en cours'
         }
         const allSaved = await Commande.findAll();
-        const orderCounter = allSaved.length++
-
+        const ordersNums = allSaved.map(order => order.numero)
+        const min = 1000000000
+        const max = 9999999999
+        const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+        let lastCheck = false
+        do {
+        ordersNums.forEach(num => {
+                const newCheck = randomNumber === num
+                lastCheck = lastCheck || newCheck
+            })
+        }while (lastCheck)
        let order = await user.createCommande({
-           numero: `TPSODR0000${orderCounter+1}`,
+           numero: `tpsodr${randomNumber}`,
            itemsLength: req.body.itemsLength,
            interet: req.body.interet,
            fraisTransport: req.body.fraisTransport,
@@ -102,9 +114,9 @@ const saveOrder = async (req, res, next) => {
         await userShoppingCart.save()
 
       const newAdded =  await Commande.findByPk(order.id, {
-           include: [UserAdresse, Plan, CartItem, Facture, Contrat],
+           include: [UserAdresse, Plan, CartItem, Facture, Contrat, Livraison],
            })
-        //sendMail.orderSuccessMail(user,req.body.items, req.body.fraisTransport, req.body.interet, req.body.montant)
+        sendMail.orderSuccessMail(user,req.body.items, req.body.fraisTransport, req.body.interet, req.body.montant)
        return  res.status(200).send(newAdded)
     } catch (e) {
         next(e.message)
@@ -125,23 +137,53 @@ deleteOrder = async (req, res, next) => {
 }
 
 updateOrder = async (req, res, next) => {
+    let messageHeader;
+    let messageContent;
     try{
         let order = await Commande.findByPk(req.body.orderId)
-        if(!order) return res.status(404).send(`La commande que voulez modifier n'exite pas`)
-
+        const currentUser = await User.findByPk(order.UserId)
+        const receiverName = currentUser.nom
+        const receiverSubname = currentUser.prenom
+        const receiverFullname = `${receiverName} ${receiverSubname}`
+        let mainUser = await User.findByPk(1)
+        if(!order) return res.status(404).send(`La commande que vous voulez modifier n'exite pas`)
         if (req.body.statusAccord) {
-        order.statusAccord = req.body.statusAccord
+            order.statusAccord = req.body.statusAccord
+            const {msgHeader, message} = sendMessage.accordMessage(req.body.statusAccord,receiverFullname, order.dateCmde)
+            messageHeader = msgHeader
+            messageContent = message
         }
         if (req.body.statusLivraison) {
         order.statusLivraison = req.body.statusLivraison
         order.dateLivraisonFinal = Date.now()
+            const {msgHeader, message} = sendMessage.livraisonMessage(req.body.statusLivraison, currentUser, order.numero)
+            messageHeader = msgHeader
+            messageContent = message
         }
-        if(req.body.history) {
-            order.historique = req.body.history
-        }
+        if(req.body.history) order.historique = req.body.history
+
         if(req.body.isExpired) {
             order.isExpired = req.body.isExpired
+            const {msgHeader, message} = sendMessage.expiredMessage(currentUser, order.numero)
+            messageHeader = msgHeader
+            messageContent = message
         }
+
+        if(req.body.expireIn) {
+            order.expireIn = req.body.expireIn
+            const {msghHeader, message} = sendMessage.expireInMessage(currentUser, order.numero, req.body.expireIn)
+            messageHeader = msghHeader
+            messageContent = message
+        }
+        let createdMessage = await Message.create({
+            msgHeader: messageHeader,
+            content: messageContent
+        })
+
+        await createdMessage.setSender(mainUser)
+        await createdMessage.setReceiver(currentUser)
+        createdMessage.reference = order.numero
+        await createdMessage.save()
         await order.save()
         const updatedOrder = await Commande.findByPk(order.id, {
             include: [UserAdresse, Plan, CartItem, Facture, Contrat]
@@ -154,17 +196,23 @@ updateOrder = async (req, res, next) => {
 
 getOrdersByUser = async (req,res, next) => {
     const transaction = await db.sequelize.transaction()
+    let userOrders = []
     try{
-
-    const token = req.headers['x-access-token']
-        if(token === 'null') return res.status(200).send([])
-    const user = decoder(token)
-        const userOrders = await Commande.findAll({
+        const token = req.headers['x-access-token']
+        const user = decoder(token)
+        const isAdmin = user.roles.indexOf('ROLE_ADMIN') !== -1
+        if(isAdmin){
+            userOrders = await Commande.findAll({include:[UserAdresse,Plan, CartItem, Facture, Contrat, Livraison],transaction})
+        } else {
+        userOrders = await Commande.findAll({
             where: {UserId: user.id},
-            include: [{all: true}],
+            include: [
+                UserAdresse,Plan, CartItem, Facture, Contrat, Livraison
+            ],
             transaction
         })
         await transaction.commit()
+        }
         return res.status(200).send(userOrders)
     } catch (e) {
         await transaction.rollback()
@@ -172,19 +220,6 @@ getOrdersByUser = async (req,res, next) => {
     }
 }
 
-getAllOrder = async (req, res, next) => {
-    try {
-    const orders = await Commande.findAll({
-        where: {userId: 1 },
-        include: [
-                 UserAdresse,Plan, CartItem, Facture, Contrat
-        ],
-    })
-        res.status(200).send(orders)
-    } catch (e) {
-        next(e.message)
-    }
-}
 
 createOrderContrat = async (req, res, next) => {
     const orderId = req.body.orderId
@@ -237,7 +272,6 @@ updateOrderContrat = async (req, res, next) => {
 module.exports = {
     getOrdersByUser,
     saveOrder,
-    getAllOrder,
     updateOrder,
     deleteOrder,
     createOrderContrat,

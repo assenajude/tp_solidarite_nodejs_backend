@@ -108,7 +108,6 @@ const addItemToCart = async (req, res, next) => {
 
 incrementItemQuantity = async (req, res, next) => {
     const item = req.body
-    console.log(item);
     try {
         let selectedItem = await CartItem.findOne({
             where: {

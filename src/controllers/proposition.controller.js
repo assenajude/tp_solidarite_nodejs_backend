@@ -17,7 +17,7 @@ const newProposition = async (req, res, next) => {
         })
     }
 
-    const {designation, ...otherProps} = req.body
+    const {designation,type, idReference,isOk, ...otherProps} = req.body
     const propOptions = []
     for(key in otherProps) {
         propOptions.push({label: key, value: otherProps[key]})
