@@ -44,9 +44,6 @@ addUserAvatar = async (req, res, next) => {
         } else {
          lienAvatar = req.body.deleting?null:`${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
         }
-
-
-        //const imageResize = await sharp(req.file.buffer).resize({width: 200, height: 200}).png().toBuffer()
         currentUser.avatar = lienAvatar
         await currentUser.save()
         return res.status(200).send({avatar: currentUser.avatar})
@@ -63,7 +60,7 @@ const getUserProfileAvatar = async (req, res, next) => {
         if(!user || !user.avatar || user.avatar === '') return res.status(200).send({avatar: null})
         return res.status(200).send({avatar:user.avatar})
     } catch (e) {
-
+        next(e)
     }
 }
 
@@ -73,7 +70,6 @@ addUserPiece = async (req, res, next) => {
         if(!user) return res.status(404).send(`L'utilisateur d'id ${req.body.userId} n'existe pas`)
         if(!req.files) return res.status(400).send('Aucune image pour mettre a jour votre profil')
         const lienPiece = `${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
-        // user.pieceIdentite = req.file.buffer
         user.pieceIdentite = lienPiece
         await user.save()
         return res.status(200).send('votre profil a été mis à jour avec succes')
@@ -119,7 +115,6 @@ const getUserFavoris = async (req,res,next) => {
         if(!user) return res.status(404).send('Utilisateur introuvable')
         const articlesFav = await user.getArticles()
         const locationsFav = await user.getLocations()
-        // const userFavoris = [...articlesFav, ...locationsFav]
         return res.status(200).send({articleFavoris: articlesFav, locationFavoris: locationsFav})
     } catch (e) {
         next(e)
@@ -168,77 +163,7 @@ toggleUserFavoris = async (req, res, next) => {
     }
 
 }
-/*
 
-const getUserMessage = async(req, res, next) => {
-    const token = req.headers['x-access-token']
-    const user = decoder(token)
-    try {
-        const connectedUser = await User.findByPk(user.id)
-        const userMessages = await Message.findAll({
-            where: {
-                [Op.or]:[
-                    {receiverId: connectedUser.id},
-                    {senderId: connectedUser.id}
-                    ]
-
-            },
-            include: MsgResponse
-        })
-        return res.status(200).send(userMessages)
-    } catch (e) {
-        next(e.message)
-    }
-}
-
-const getUserMessageRead = async (req, res, next) => {
-    try{
-        let selectedMessage = await Message.findByPk(req.body.messageId)
-        if(req.body.isRead) {
-        selectedMessage.isRead = req.body.isRead
-        }else {
-            selectedMessage.msgHeader = req.body.title
-            selectedMessage.content = req.body.message
-        }
-        await selectedMessage.save()
-        return res.status(200).send(selectedMessage)
-    } catch (e) {
-        next(e.message)
-    }
-}
-
-const sendMessageToToutPromo = async (req,res, next) => {
-    try{
-        const sender = await User.findByPk(req.body.userId)
-        const receiver = await User.findByPk(1)
-        let sentMessage = await Message.create({
-            msgHeader: req.body.title,
-            content: req.body.message
-        })
-        await sentMessage.setSender(sender)
-        await sentMessage.setReceiver(receiver)
-        return res.status(200).send(sentMessage)
-    } catch (e) {
-        next(e.message)
-    }
-}
-
-const respondeToMsg = async (req, res, next)=> {
-    try{
-        let selectedMsg = await Message.findByPk(req.body.messageId)
-        await selectedMsg.createMsgResponse({
-            respHeader: req.body.title,
-            respContent: req.body.reponse
-        })
-        const newUpdated = await Message.findByPk(selectedMsg.id, {
-            include: MsgResponse
-        })
-        return res.status(200).send(newUpdated)
-    } catch (e) {
-        next(e.message)
-    }
-}
-*/
 module.exports = {
     updateProfile,
     addUserAvatar,

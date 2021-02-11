@@ -79,13 +79,11 @@ signin = async (req, res, next) => {
              expiresIn: 86400
          });
 
-        //res.set('Content-Type', 'image/png')
         return res.status(200).send({
             accessToken: authToken
         })
     } catch (e) {
         return res.status(500).send(e.message)
-        //next(e.message)
     }
 };
 

@@ -14,7 +14,6 @@ const createTranche = async (req, res, next) => {
             montant: req.body.montant
         }
         let newTranche = await facture.createTranche(trancheData)
-         // await newTranche.setFacture(facture)
         const factureTranches = await facture.getTranches()
         newTranche.numero = `${facture.numero}TRCH${factureTranches.length}`
         await newTranche.save()

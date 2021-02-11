@@ -11,18 +11,16 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    await queryInterface.bulkInsert('Articles', [{
-      designArticle: 'Chaussure de securite',
-      qteStock: 10,
-      prixReel: 25000,
-      prixPromo: 20000,
-      imageArticle: '',
-      aide: true,
-      descripArticle:'Chaussure de securite de haute qualité',
-      categoryId: 1,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }],{});
+    await queryInterface.bulkInsert('Roles', [
+        {
+         name: 'admin'
+        },
+      {
+        name:'moderator'
+      },
+      {
+      name: 'user'
+      } ], {});
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -32,6 +30,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete('Articles',null, {} )
+   await queryInterface.bulkDelete('Roles', null, {});
+
   }
 };

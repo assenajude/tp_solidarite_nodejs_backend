@@ -29,7 +29,6 @@ addNewLocation = async (req, res, next) => {
         aide: req.body.aide
 
     };
-    // const transaction = await db.sequelize.transaction()
     try {
         let categorie = await Categorie.findByPk(idCategorie);
         if (!categorie) return res.status(404).send(`La categorie d'id ${idCategorie} n'existe pas`)

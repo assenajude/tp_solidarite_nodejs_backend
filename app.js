@@ -53,10 +53,8 @@ app.use('/avatars', express.static(path.join(__dirname, 'avatars')));
 app.use(express.static(path.join(__dirname, 'public')))
 
 const db = require('./db/models/index');
-const initialiseRole = require('./src/startup/initRoleFunction')
 db.sequelize.sync().then(() => {
     logger.info('the app has been successfully connected to the database');
-    // initialiseRole()
 }).catch(error => {
     logger.error(error.message)});
 

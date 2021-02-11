@@ -15,9 +15,6 @@ createContrat = async (req, res, next) => {
             mensualite: req.body.nbMensualite,
             status: req.body.status
         })
-        /*const justUpdated = await order.reload({
-            include: [UserAdresse,Plan, CartItem, Facture, Contrat]
-        })*/
         return res.status(201).send(newContrat)
     } catch (e) {
         next(e.message)
