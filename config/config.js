@@ -19,16 +19,17 @@ module.exports = {
         }
     },
     production: {
+        use_env_variable:process.env.DATABASE_URL,
         username: process.env.PROD_DB_USERNAME,
         password: process.env.PROD_DB_PASSWORD,
         database: process.env.PROD_DB_NAME,
         host: process.env.PROD_DB_HOSTNAME,
         port: process.env.PROD_DB_PORT,
-        dialect: 'mysql',
+        dialect: process.env.DB_DIALECT,
         dialectOptions: {
             bigNumberStrings: true,
             ssl: {
-                ca: fs.readFileSync(__dirname + '/mysql-ca-master.crt')
+                "rejectUnauthorized": false
             }
         }
     }
