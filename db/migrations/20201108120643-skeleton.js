@@ -12,7 +12,7 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction()
     try {
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'nom',
           {
             type: Sequelize.INTEGER,
@@ -20,7 +20,7 @@ module.exports = {
           {transaction}
       );
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'prenom',
           {
             type: Sequelize.INTEGER,
@@ -28,7 +28,7 @@ module.exports = {
           {transaction}
       );
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'adresse',
           {
             type: Sequelize.INTEGER,
@@ -36,7 +36,7 @@ module.exports = {
           {transaction}
       );
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'phone',
           {
             type: Sequelize.INTEGER,
@@ -44,7 +44,7 @@ module.exports = {
           {transaction}
       );
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'avatar',
           {
             type: Sequelize.STRING,
@@ -52,7 +52,7 @@ module.exports = {
           {transaction}
       );
       await queryInterface.addColumn(
-          'users',
+          'Users',
           'pieceIdentite',
           {
             type: Sequelize.STRING,
@@ -77,31 +77,31 @@ module.exports = {
      */
     try {
     await queryInterface.removeColumn(
-        'users',
+        'Users',
         'nom',
         {transaction}
     );
     await queryInterface.removeColumn(
-        'users',
+        'Users',
         'prenom',
         {transaction}
     );
     await queryInterface.removeColumn(
-        'users',
+        'Users',
         'adresse',
         {transaction}
     );
     await queryInterface.removeColumn(
-        'users',
+        'Users',
         'phone',
         {transaction}
     );
     await queryInterface.removeColumn(
-        'users',
+        'Users',
         'avatar',
         {transaction}
     ); await queryInterface.removeColumn(
-        'users',
+        'Users',
         'pieceIdentite',
           {transaction}
     );

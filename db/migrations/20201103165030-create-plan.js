@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('plans', {
+    await queryInterface.createTable('Plans', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       libelle: {
-        type: Sequelize.STRING
+        type: SequelizePSTRING
       },
       descripPlan: {
         type: Sequelize.STRING

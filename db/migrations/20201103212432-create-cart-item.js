@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('cartItems', {
+    await queryInterface.createTable('CartItems', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -37,6 +37,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('cartItems');
+    await queryInterface.dropTable('CartItems');
   }
 };
