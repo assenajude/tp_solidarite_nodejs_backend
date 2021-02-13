@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       libelle: {
-        type: SequelizePSTRING
+        type: Sequelize.STRING
       },
       descripPlan: {
         type: Sequelize.STRING
