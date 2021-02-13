@@ -1,9 +1,9 @@
 const http = require('http');
 const app = require('./app');
+const logger = require('./src/startup/logger')
 
 const normalizePort = val => {
     const port = parseInt(val, 10);
-
     if (isNaN(port)) {
         return val;
     }
@@ -23,11 +23,11 @@ const errorHandler = error => {
     const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
     switch (error.code) {
         case 'EACCES':
-            console.error(bind + ' requires elevated privileges.');
+            logger.error(bind + ' requires elevated privileges.');
             process.exit(1);
             break;
         case 'EADDRINUSE':
-            console.error(bind + ' is already in use.');
+            logger.error(bind + ' is already in use.');
             process.exit(1);
             break;
         default:
@@ -41,7 +41,7 @@ server.on('error', errorHandler);
 server.on('listening', () => {
     const address = server.address();
     const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-    console.log('Listening on ' + bind);
+    logger.info('Listening on ' + bind);
 });
 
 server.listen(port);
