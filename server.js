@@ -1,4 +1,6 @@
 const http = require('http');
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
 const app = require('./app');
 const logger = require('./src/startup/logger')
 
@@ -35,13 +37,31 @@ const errorHandler = error => {
     }
 };
 
-const server = http.createServer(app);
 
-server.on('error', errorHandler);
-server.on('listening', () => {
-    const address = server.address();
-    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-    logger.info('Listening on ' + bind);
-});
+if (cluster.isMaster) {
+    logger.info(`Master ${process.pid} is running`);
+    // Fork workers.
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
 
-server.listen(port);
+    cluster.on('exit', (worker, code, signal) => {
+        logger.info(`worker ${worker.process.pid} died`);
+    });
+} else {
+
+    const server = http.createServer(app);
+
+    server.on('error', errorHandler);
+    server.on('listening', () => {
+        const address = server.address();
+        const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+        logger.info('Listening on ' + bind);
+    });
+
+    server.listen(port);
+
+    logger.info(`Worker ${process.pid} started`);
+}
+
+
