@@ -2,9 +2,9 @@ require('dotenv').config()
 module.exports = {
     development: {
         host: process.env.DB_HOST,
-        username:'postgres',
-        password:'kouakou01',
-        database: 'solidaritedb',
+        username:process.env.DB_USERNAME,
+        password:process.env.DB_PASS,
+        database: process.env.DB_NAME,
         dialect: process.env.DB_DIALECT,
         dialectOptions: {
             decimalNumbers: true
