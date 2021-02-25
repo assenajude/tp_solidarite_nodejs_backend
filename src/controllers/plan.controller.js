@@ -1,8 +1,13 @@
+let Queue = require('bull')
 const db = require('../../db/models/index');
 const Payement = db.Payement;
 const Plan = db.Plan;
 const {planQueue} = require('../workers/queues')
 const logger = require('../startup/logger')
+
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+let workQueue = new Queue('work', REDIS_URL)
+
 
 createPlan = async (req, res, next) => {
     const idPayement = req.body.payementId;
@@ -23,22 +28,22 @@ createPlan = async (req, res, next) => {
         imagesPlan: planImages
     }
     try {
-         await planQueue.add('addPayement',data, {
+         await workQueue.add('addPayement',data, {
               removeOnComplete: true,
               removeOnFail: true,
               attempts: 1,
           })
             let payement = await Payement.findByPk(idPayement);
             if (!payement) return res.status(404).send(`Le payement d'id ${idPayement} n'a pas été trouvé`)
-            planQueue.process('addPayement',async (job) =>  {
+         /*   planQueue.process('addPayement',async (job) =>  {
              const newPlan = await payement.createPlan(job.data)
                 return newPlan
-        })
-        planQueue.on('failed', (error) => {
+        })*/
+        workQueue.on('failed', (error) => {
             logger.error(error)
         })
 
-        planQueue.on('completed', (job, result) => {
+        workQueue.on('completed', (job, result) => {
             return res.status(201).send(result)
         })
     } catch (e) {
