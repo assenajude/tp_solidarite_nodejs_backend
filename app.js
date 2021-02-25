@@ -1,6 +1,4 @@
-if(process.env.NODE_ENV !== 'production'){
 require('dotenv').config()
-}
 const errorHandler = require('./src/middlewares/error.handler')
 const bodyParser = require('body-parser');
 const cors = require('cors');

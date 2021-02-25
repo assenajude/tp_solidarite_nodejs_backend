@@ -1,6 +1,5 @@
 const http = require('http');
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
+let Queue = require('bull')
 const app = require('./app');
 const logger = require('./src/startup/logger')
 
@@ -15,6 +14,10 @@ const normalizePort = val => {
     return false;
 };
 const port = normalizePort(process.env.PORT || '5000');
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+
+let workQueue = new Queue('work', REDIS_URL)
+
 app.set('port', port);
 
 const errorHandler = error => {
@@ -38,17 +41,24 @@ const errorHandler = error => {
 };
 
 
-if (cluster.isMaster) {
-    logger.info(`Master ${process.pid} is running`);
-    // Fork workers.
-    for (let i = 0; i < numCPUs; i++) {
-        cluster.fork();
-    }
+app.post('/job', async (req, res) => {
+    let job = await workQueue.add()
+    res.json({id: job.id})
+})
+app.get('/job/:id', async (req, res) => {
+    let id = req.params.id
+    let job = await workQueue.getJobFromId(id)
+    if(job === null) {
+        res.status(404).end();
+    } else {
+        let state = await job.getState()
+        let progress = job._progress
+        let reason = job.failedReason
+        res.json({id, state, progress, reason});
 
-    cluster.on('exit', (worker, code, signal) => {
-        logger.info(`worker ${worker.process.pid} died`);
-    });
-} else {
+    }
+})
+
 
     const server = http.createServer(app);
 
@@ -61,7 +71,9 @@ if (cluster.isMaster) {
 
     server.listen(port);
 
-    logger.info(`Worker ${process.pid} started`);
-}
+workQueue.on('global:completed', (jobId, result) => {
+    logger.info(`job completed with result ${result}`)
+})
+
 
 
