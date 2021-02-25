@@ -1,5 +1,6 @@
 let throng = require('throng')
 let Queue = require('bull')
+const db = require('./db/models/index');
 const Payement = db.Payement;
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
@@ -24,7 +25,7 @@ function start() {
             process += 1
             job.progress(progress)
         }
-        return newPlan
+           return newPlan
     })
 }
 
