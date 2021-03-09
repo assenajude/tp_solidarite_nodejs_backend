@@ -17,6 +17,9 @@ module.exports = {
       typeCateg: {
         type: Sequelize.STRING
       },
+      imageCateg: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

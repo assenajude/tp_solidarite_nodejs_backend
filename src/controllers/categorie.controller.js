@@ -1,16 +1,34 @@
 const db = require('../../db/models');
+const Espace = db.Espace
 const Categorie = db.Categorie;
 
 
 createCategorie = async (req, res, next) => {
+    let imageLink=''
+    if(req.files) {
+        const file = req.files[0]
+         imageLink = `${req.protocol}://${req.get('host')}/images/${file.filename}`
+    }
     const newCategorie = {
         libelleCateg: req.body.libelle,
         descripCateg: req.body.description,
-        typeCateg: req.body.type
+        imageCateg: imageLink
     };
     try {
-        const categorie = await Categorie.create(newCategorie);
-        res.status(201).send(categorie)
+        let selectedEspace = await Espace.findByPk(req.body.idEspace)
+        if(!selectedEspace) return res.status(404).send('Vous devez choisir un espace pour ajouter une categorie')
+        let categorie = await selectedEspace.createCategorie(newCategorie);
+        let type = ''
+        if(selectedEspace.nom === 'e-commerce') {
+            type = 'article'
+        } else if(selectedEspace.nom === 'e-location'){
+            type = 'location'
+        } else {
+            type = 'service'
+        }
+        categorie.typeCateg = type
+        await categorie.save()
+       return  res.status(201).send(categorie)
     } catch (e) {
         next(e.message)
     }
@@ -22,16 +40,28 @@ createCategorie = async (req, res, next) => {
 
 getAllCategories = async (req, res, next) => {
     try {
-    const categories = await Categorie.findAll();
-     res.status(200).send(categories);
+        const categories = await Categorie.findAll()
+        return res.status(200).send(categories);
     }catch(error) {
         next(error)
     }
+}
 
+const getEspaceCategorie = async (req, res, next) => {
+    const idEspace = req.body.idEspace
+    try {
+        const selectedEspace = await Espace.findByPk(idEspace)
+        if(!selectedEspace) return res.status(404).send('Veuillez choisir un espace')
+        const categoriesEspace = await selectedEspace.getCategories()
+        return res.status(200).send(categoriesEspace)
+    } catch (e) {
+        next(e.message)
+    }
 }
 
 
 module.exports = {
     createCategorie,
     getAllCategories,
+    getEspaceCategorie
 }

@@ -28,24 +28,22 @@ createPlan = async (req, res, next) => {
         imagesPlan: planImages
     }
     try {
-         await workQueue.add('addPayement',data, {
+         /*await workQueue.add('addPayement',data, {
               removeOnComplete: true,
               removeOnFail: true,
               attempts: 1,
-          })
+          })*/
             let payement = await Payement.findByPk(idPayement);
             if (!payement) return res.status(404).send(`Le payement d'id ${idPayement} n'a pas été trouvé`)
-         /*   planQueue.process('addPayement',async (job) =>  {
-             const newPlan = await payement.createPlan(job.data)
-                return newPlan
-        })*/
-        workQueue.on('failed', (error) => {
+            const newPlan = await payement.createPlan(data)
+  /*      workQueue.on('failed', (error) => {
             logger.error(error)
         })
 
         workQueue.on('completed', (job, result) => {
             return res.status(201).send(result)
-        })
+        })*/
+  return res.status(201).send(newPlan)
     } catch (e) {
         next(e.message)
     }

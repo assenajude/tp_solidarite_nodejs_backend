@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Categorie.belongsTo(models.Espace)
       Categorie.hasMany(models.Article)
       Categorie.hasMany(models.Location)
       Categorie.hasMany(models.Service)
@@ -19,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
   Categorie.init({
     libelleCateg: DataTypes.STRING,
     descripCateg: DataTypes.STRING,
-    typeCateg: DataTypes.STRING
+    typeCateg: DataTypes.STRING,
+    imageCateg: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Categorie',

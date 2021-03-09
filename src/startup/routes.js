@@ -1,5 +1,6 @@
 const authRoute = require('../routes/auth.routes');
 const userRoutes = require('../routes/user.routes');
+const espaceRoutes = require('../routes/espace.routes')
 const categorieRoutes = require('../routes/categorie.routes');
 const articleRoutes = require('../routes/article.routes');
 const locationRoutes = require('../routes/location.routes');
@@ -20,10 +21,12 @@ const optionRoutes = require('../routes/option.routes')
 const propositionRoutes  = require('../routes/proposition.route')
 const faqRoutes = require('../routes/faq.routes')
 const messageRoutes = require('../routes/message.routes')
+const s3Routes = require('../routes/s3_upload.routes')
 
 module.exports = function routes(app) {
     app.use('/api/auth', authRoute);
     app.use('/api/users', userRoutes);
+    app.use('/api/espaces', espaceRoutes)
     app.use('/api/categories', categorieRoutes);
     app.use('/api/articles', articleRoutes);
     app.use('/api/locations',locationRoutes);
@@ -44,4 +47,5 @@ module.exports = function routes(app) {
     app.use('/api/propositions', propositionRoutes)
     app.use('/api/faq', faqRoutes)
     app.use('/api/messages', messageRoutes)
+    app.use('/api/uploadFile', s3Routes)
 }
