@@ -6,19 +6,13 @@ const ProductOption = db.ProductOption
 createArticle = async (req, res, next) => {
     const idCategorie = req.body.categorieId;
     let incrementArticle = 0
-    let imagesTab = []
-    if(req.files) {
-        req.files.forEach(file => {
-            const lienImage = `${req.protocol}://${req.get('host')}/images/${file.filename}`
-            imagesTab.push(lienImage)
-        })
-    }
+
     const newArticle = {
         designArticle: req.body.designation,
         qteStock: req.body.quantite,
         prixReel: req.body.prixReel,
         prixPromo: req.body.prixPromo,
-        imagesArticle: imagesTab,
+        imagesArticle: req.body.articleImagesLinks,
         aide: req.body.aide,
         descripArticle: req.body.description
     };
@@ -75,7 +69,7 @@ editArticle = async (req, res, next) => {
             qteStock: req.body.quantite,
             prixReel: req.body.prixReel,
             prixPromo: req.body.prixPromo,
-            imagesArticle: images,
+            imagesArticle: articleImagesLinks,
             aide: req.body.aide,
             descripArticle: req.body.description
         })

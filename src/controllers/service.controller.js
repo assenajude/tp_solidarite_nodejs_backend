@@ -5,17 +5,11 @@ const Service = db.Service
 createService = async (req, res, next) => {
     const idCategorie = req.body.categoryId;
     let incrementService = 0
-    let serviceImagesTab = []
-    if(req.files) {
-        req.files.forEach(file => {
-            const lienImage = `${req.protocol}://${req.get('host')}/images/${file.filename}`
-            serviceImagesTab.push(lienImage)
-        })
-    }
+
     const serviceData = {
         libelle: req.body.libelle,
         description: req.body.description,
-        imagesService: serviceImagesTab,
+        imagesService: req.body.serviceImagesLinks,
         montantMin: req.body.montantMin,
         montantMax: req.body.montantMax,
         isDispo: req.body.isDispo

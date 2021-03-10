@@ -6,13 +6,7 @@ const ProductOption = db.ProductOption
 addNewLocation = async (req, res, next) => {
     const idCategorie = req.body.categoryId
     let locationLength = 0
-    let imagesTab = []
-    if(req.files) {
-        req.files.forEach(file => {
-        const imageLocation = `${req.protocol}://${req.get('host')}/images/${file.filename}`
-            imagesTab.push(imageLocation)
-        })
-    }
+
     const newLocation = {
         libelleLocation: req.body.libelle,
         descripLocation: req.body.description,
@@ -20,7 +14,7 @@ addNewLocation = async (req, res, next) => {
         coutPromo: req.body.coutPromo,
         coutReel: req.body.coutReel,
         frequenceLocation: req.body.frequence,
-        imagesLocation: imagesTab,
+        imagesLocation: req.body.locationImagesLinks,
         debutLocation: req.body.debut,
         finLocation: req.body.fin,
         nombreCaution: req.body.caution,

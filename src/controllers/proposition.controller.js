@@ -7,16 +7,6 @@ const User = db.User
 const newProposition = async (req, res, next) => {
     const token = req.headers['x-access-token']
     const user = decoder(token)
-
-
-    let imagesProposition = []
-    if(req.files) {
-        req.files.forEach(image => {
-            const imageLink = `${req.protocol}://${req.get('host')}/images/${image.filename}`
-            imagesProposition.push(imageLink)
-        })
-    }
-
     const {designation,type, idReference,isOk, ...otherProps} = req.body
     const propOptions = []
     for(key in otherProps) {
@@ -26,7 +16,7 @@ const newProposition = async (req, res, next) => {
         designation,
         description: propOptions,
         dateAchat: Date.now(),
-        imagesProposition
+        imagesProposition: req.body.propImagesLinks
     }
     try {
     let connectedUser = await User.findByPk(user.id)

@@ -4,15 +4,10 @@ const Categorie = db.Categorie;
 
 
 createCategorie = async (req, res, next) => {
-    let imageLink=''
-    if(req.files) {
-        const file = req.files[0]
-         imageLink = `${req.protocol}://${req.get('host')}/images/${file.filename}`
-    }
     const newCategorie = {
         libelleCateg: req.body.libelle,
         descripCateg: req.body.description,
-        imageCateg: imageLink
+        imageCateg: req.body.categImagesLinks[0]
     };
     try {
         let selectedEspace = await Espace.findByPk(req.body.idEspace)
