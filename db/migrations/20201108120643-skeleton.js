@@ -55,7 +55,25 @@ module.exports = {
           'Users',
           'pieceIdentite',
           {
-            type: Sequelize.STRING,
+            type: Sequelize.ARRAY(Sequelize.STRING)
+          },
+          {transaction}
+      );
+      await queryInterface.addColumn(
+          'Users',
+          'isHero',
+          {
+            type: Sequelize.BOOLEAN,
+              defaultValue: false
+          },
+          {transaction}
+      );
+      await queryInterface.addColumn(
+          'Users',
+          'fidelitySeuil',
+          {
+            type: Sequelize.INTEGER,
+              defaultValue: 0
           },
           {transaction}
       );
@@ -100,9 +118,20 @@ module.exports = {
         'Users',
         'avatar',
         {transaction}
-    ); await queryInterface.removeColumn(
+    );
+    await queryInterface.removeColumn(
         'Users',
         'pieceIdentite',
+          {transaction}
+    );
+    await queryInterface.removeColumn(
+        'Users',
+        'isHero',
+          {transaction}
+    );
+    await queryInterface.removeColumn(
+        'Users',
+        'fidelitySeuil',
           {transaction}
     );
 

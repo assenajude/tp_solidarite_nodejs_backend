@@ -43,6 +43,17 @@ module.exports = (sequelize, DataTypes) => {
         as: 'sender',
         foreignKey: 'senderId'
       })
+      User.hasOne(models.CompteParrainage)
+      User.belongsToMany(models.User, {
+        as: 'Parrains',
+        through: models.ParrainFilleul,
+        foreignKey: 'parrainId'
+      })
+      User.belongsToMany(models.User, {
+        as: 'Filleuls',
+        through: models.ParrainFilleul,
+        foreignKey:'filleulId'
+      })
     }
   };
   User.init({
@@ -54,13 +65,17 @@ module.exports = (sequelize, DataTypes) => {
     phone: DataTypes.STRING,
     adresse: DataTypes.STRING,
     avatar: DataTypes.STRING,
-    pieceIdentite: DataTypes.STRING,
+    pieceIdentite: DataTypes.ARRAY(DataTypes.STRING),
     profession: DataTypes.STRING,
     domaine: DataTypes.STRING,
     statusEmploi: DataTypes.STRING,
     isHero: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    fidelitySeuil: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {
     sequelize,

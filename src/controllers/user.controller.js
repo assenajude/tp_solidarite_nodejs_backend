@@ -36,15 +36,9 @@ addUserAvatar = async (req, res, next) => {
     const token = req.headers['x-access-token']
     const user = decoder(token)
     try {
-        let lienAvatar;
         let currentUser = await User.findByPk(user.id)
         if(!currentUser) return res.status(404).send(`L'utilisateur d'id ${user.id} n'existe pas`)
-        if (!req.files) {
-            return res.status(400).send('Aucune image pour mettre a jour votre profil')
-        } else {
-         lienAvatar = req.body.deleting?null:`${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
-        }
-        currentUser.avatar = lienAvatar
+        currentUser.avatar = req.body.avatarUrl
         await currentUser.save()
         return res.status(200).send({avatar: currentUser.avatar})
     } catch (e) {
@@ -68,11 +62,9 @@ addUserPiece = async (req, res, next) => {
     try {
         const user = await User.findByPk(req.body.userId)
         if(!user) return res.status(404).send(`L'utilisateur d'id ${req.body.userId} n'existe pas`)
-        if(!req.files) return res.status(400).send('Aucune image pour mettre a jour votre profil')
-        const lienPiece = `${req.protocol}://${req.get('host')}/avatars/${req.files[0].filename}`
-        user.pieceIdentite = lienPiece
+        user.pieceIdentite = req.body.piecesUrlArray
         await user.save()
-        return res.status(200).send('votre profil a été mis à jour avec succes')
+        return res.status(200).send(user.pieceIdentite)
     } catch (e) {
         next(e.message)
     }

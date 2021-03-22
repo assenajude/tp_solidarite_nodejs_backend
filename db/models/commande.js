@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
       Commande.hasOne(models.Facture)
       Commande.hasMany(models.Contrat)
       Commande.hasMany(models.Livraison)
+      Commande.belongsToMany(models.CompteParrainage,
+          {
+            through: models.OrderParrain
+          })
 
     }
   };

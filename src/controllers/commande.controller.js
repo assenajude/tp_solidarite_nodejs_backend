@@ -15,6 +15,7 @@ const Article = db.Article
 const Location = db.Location
 const Message = db.Message
 const Livraison = db.Livraison
+const CompteParrainage = db.CompteParrainage
 const sendMessage = require('../utilities/sendMessage')
 
 
@@ -23,12 +24,13 @@ const saveOrder = async (req, res, next) => {
     const token = req.headers['x-access-token']
         if(token=== 'null' || !token) return res.status(404).send('Impossible de passer la commande')
       const connectedUser = decoder(token)
+        const currentOrder = req.body.order
         let items = []
         let statusAccord = '';
         let user = await User.findByPk(connectedUser.id)
         if(!user) return res.status(404).send("l'utlisateur n'a pas été trouvé")
-        const userAdresse = await UserAdresse.findByPk(req.body.userAdresseId, )
-        const plan = await Plan.findByPk(req.body.planId, {include: Payement})
+        const userAdresse = await UserAdresse.findByPk(currentOrder.userAdresseId, )
+        const plan = await Plan.findByPk(currentOrder.planId, {include: Payement})
         const modePayement = plan.Payement.mode
         if(modePayement.toLowerCase() === 'cash') {
             statusAccord = 'Accepté'
@@ -49,12 +51,12 @@ const saveOrder = async (req, res, next) => {
         }while (lastCheck)
        let order = await user.createCommande({
            numero: `tpsodr${randomNumber}`,
-           itemsLength: req.body.itemsLength,
-           interet: req.body.interet,
-           fraisTransport: req.body.fraisTransport,
-           montant: req.body.montant,
-           dateLivraisonDepart: req.body.dateLivraisonDepart,
-           typeCmde: req.body.typeCmde,
+           itemsLength: currentOrder.itemsLength,
+           interet: currentOrder.interet,
+           fraisTransport: currentOrder.fraisTransport,
+           montant: currentOrder.montant,
+           dateLivraisonDepart: currentOrder.dateLivraisonDepart,
+           typeCmde: currentOrder.typeCmde,
            statusAccord
        })
         if(userAdresse) {
@@ -68,7 +70,7 @@ const saveOrder = async (req, res, next) => {
             where: {UserId: user.id}
         })
 
-       items = req.body.items
+       items = currentOrder.items
 
        for(let i = 0; i <items.length; i++) {
            (function (i) {
@@ -113,10 +115,31 @@ const saveOrder = async (req, res, next) => {
         userShoppingCart.cartAmount = 0
         await userShoppingCart.save()
 
-      const newAdded =  await Commande.findByPk(order.id, {
+      let newAdded =  await Commande.findByPk(order.id, {
            include: [UserAdresse, Plan, CartItem, Facture, Contrat, Livraison],
            })
-        sendMail.orderSuccessMail(user,req.body.items, req.body.fraisTransport, req.body.interet, req.body.montant)
+
+        if(modePayement.toLowerCase() === 'cash') {
+            user.fidelitySeuil += newAdded.montant
+            await user.save()
+        }
+
+        const parrainsTab = req.body.parrains
+        for(let i = 0; i<parrainsTab.length; i++) {
+            const newParrain = parrainsTab[i];
+            (async function (parrain) {
+                let selectParrain = await CompteParrainage.findByPk(parrain.id)
+                selectParrain.quotite = parrain.quotite - parrain.parrainAction
+                await selectParrain.save()
+                newAdded.addCompteParrainage(selectParrain, {
+                    through: {
+                        action: parrain.parrainAction
+                    }
+                })
+
+            })(newParrain)
+        }
+        // sendMail.orderSuccessMail(user,req.body.items, req.body.fraisTransport, req.body.interet, req.body.montant)
        return  res.status(200).send(newAdded)
     } catch (e) {
         next(e.message)

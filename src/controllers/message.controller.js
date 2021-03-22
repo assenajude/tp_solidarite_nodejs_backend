@@ -2,8 +2,10 @@ const db = require('../../db/models')
 const Op = db.Sequelize.Op
 const Message = db.Message
 const MsgResponse = db.MsgResponse
+const ParrainFilleul = db.ParrainFilleul
 const User = db.User
 const decoder = require('jwt-decode')
+const sendMessage = require('../utilities/sendMessage')
 
 
 const getUserMessage = async(req, res, next) => {
@@ -108,6 +110,34 @@ const deleteMsgResponse = async (req, res, next) => {
     }
 }
 
+const sendParrainageMessage = async (req, res, next) => {
+    const senderId = req.body.idSender
+    const receiverId = req.body.idReceiver
+    try {
+        const sender = await User.findByPk(senderId)
+        const receiver = await User.findByPk(receiverId)
+    const messageData = sendMessage.parrainageMessage(receiver)
+    let parrainageMessage  = await Message.create({
+        msgHeader: messageData.messageHeader,
+        content: messageData.content
+    })
+    await parrainageMessage.setSender(sender)
+    await parrainageMessage.setReceiver(receiver)
+
+        await receiver.addFilleul(sender, {
+            through: {
+                messageSent: true,
+                inSponsoring: false,
+                sponsoringSate: 'pending'
+            }
+        })
+        return res.status(201).send(parrainageMessage)
+    } catch (e) {
+        next(e.message)
+    }
+
+}
+
 module.exports = {
     respondeToMsg,
     sendMessageToToutPromo,
@@ -115,5 +145,6 @@ module.exports = {
     getUserMessage,
     updateResponse,
     deleteMessage,
-    deleteMsgResponse
+    deleteMsgResponse,
+    sendParrainageMessage
 }

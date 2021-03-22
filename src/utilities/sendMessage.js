@@ -38,9 +38,16 @@ const expireInMessage = (receiver, numOrder, expireIn) =>  {
 return {msghHeader, message}
 }
 
+const parrainageMessage = (receiver) => {
+    const messageHeader = `Demande de parrainage`
+    const content = `Bonjour ${receiver.nom} ${receiver.prenom}, je viens demander votre parrainage pour mes prochaines commandes sur Tout-Promo.`
+    return {messageHeader, content}
+}
+
 module.exports = {
     accordMessage,
     livraisonMessage,
     expiredMessage,
-    expireInMessage
+    expireInMessage,
+    parrainageMessage
 }

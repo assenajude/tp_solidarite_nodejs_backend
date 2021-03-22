@@ -7,7 +7,7 @@ const User = db.User
 const newProposition = async (req, res, next) => {
     const token = req.headers['x-access-token']
     const user = decoder(token)
-    const {designation,type, idReference,isOk, ...otherProps} = req.body
+    const {designation,type, idReference,isOk,propImagesLinks, ...otherProps} = req.body
     const propOptions = []
     for(key in otherProps) {
         propOptions.push({label: key, value: otherProps[key]})
@@ -38,15 +38,7 @@ const getAllProposition = async (req, res, next) => {
 }
 
 const editProposition = async (req, res, next) => {
-    let listImages = []
-    if(req.files) {
-        req.files.forEach(image => {
-            const imageLink = `${req.protocol}://${req.get('host')}/images/${image.filename}`
-            listImages.push(imageLink)
-        })
-    }
-
-    const {designation,images,isOk,idReference,type,id,...optionsList} = req.body
+    const {designation,propImagesLinks,isOk,idReference,type,id,...optionsList} = req.body
     const optionsTab = []
     for(key in optionsList) {
         optionsTab.push({label: key,value: optionsList[key]})
@@ -58,7 +50,7 @@ const editProposition = async (req, res, next) => {
         const updated = await proposition.update({
             designation: req.body.designation,
             description: optionsTab,
-            imagesProposition: listImages,
+            imagesProposition: propImagesLinks,
             isOk: req.body.isOk,
             referenceId: req.body.idReference,
             typeReference: req.body.type

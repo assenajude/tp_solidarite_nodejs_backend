@@ -1,1 +1,7 @@
 {"message":"connect ETIMEDOUT 192.168.8.100:5432","level":"error"}
+{"message":"connect ETIMEDOUT 192.168.8.100:5432","level":"error"}
+{"message":"connect ENETUNREACH 192.168.8.100:5432","level":"error"}
+{"message":"connect ENETUNREACH 192.168.8.100:5432","level":"error"}
+{"message":"connect ENETUNREACH 192.168.8.100:5432","level":"error"}
+{"message":"connect ECONNREFUSED 192.168.8.101:5432","level":"error"}
+{"name":"SequelizeDatabaseError","parent":{"length":210,"name":"error","severity":"ERREUR","code":"42701","file":"d:\\pginstaller_12.auto\\postgres.windows-x64\\src\\backend\\commands\\tablecmds.c","line":"6112","routine":"check_for_column_name_collision","sql":"ALTER TABLE \"public\".\"Users\" ADD COLUMN \"isHero\" BOOLEAN DEFAULT false;"},"original":{"length":210,"name":"error","severity":"ERREUR","code":"42701","file":"d:\\pginstaller_12.auto\\postgres.windows-x64\\src\\backend\\commands\\tablecmds.c","line":"6112","routine":"check_for_column_name_collision","sql":"ALTER TABLE \"public\".\"Users\" ADD COLUMN \"isHero\" BOOLEAN DEFAULT false;"},"sql":"ALTER TABLE \"public\".\"Users\" ADD COLUMN \"isHero\" BOOLEAN DEFAULT false;","level":"error"}
