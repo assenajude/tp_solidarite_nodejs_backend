@@ -24,7 +24,7 @@ const createCompteParrainage = async (req, res, next) => {
         if(!connectedUser) return res.status(404).send("le compte d'utilisateur n'a pas été trouvé")
         const newCompteParrain = await connectedUser.createCompteParrainage(data)
         const newAdded = await CompteParrainage.findByPk(newCompteParrain.id, {
-            include:  [{model: User, attributes:{exclude: ['password']}}]
+            include:  [{model: User, attributes:{exclude: ['password']}}, Commande]
         })
         return res.status(201).send(newAdded)
     } catch (e) {
@@ -40,7 +40,10 @@ const editInitialFund = async (req, res, next) => {
         selectedCompte.active = false
         selectedCompte.compteState = 'pending'
         await selectedCompte.save()
-        return res.status(200).send(selectedCompte)
+        const newUpdated = await CompteParrainage.findByPk(selectedCompte.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
+        })
+        return res.status(200).send(newUpdated)
     } catch (e) {
         next(e.message)
     }
@@ -54,7 +57,10 @@ const editQuotiteFund = async (req, res, next) => {
         if(quotite > solde) return res.status(400).send("Quotité superieure au solde")
         selectedCompte.quotite = quotite
         await selectedCompte.save()
-        return res.status(200).send(selectedCompte)
+        const justUpdated = await CompteParrainage.findByPk(selectedCompte.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
+        })
+        return res.status(200).send(justUpdated)
     } catch (e) {
         next(e.message)
     }
@@ -67,7 +73,10 @@ const activeParrainCompte = async (req, res, next) => {
         selectedParrainCompte.active = true
         selectedParrainCompte.compteState = 'working'
         await selectedParrainCompte.save()
-        return res.status(200).send(selectedParrainCompte)
+        const activatedCompte = await CompteParrainage.findByPk(selectedParrainCompte.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
+        })
+        return res.status(200).send(activatedCompte)
     } catch (e) {
         next(e.message)
     }
@@ -83,12 +92,12 @@ const getUserCompte = async (req, res, next) => {
         let comptes;
         if(isUserAdmin){
             comptes = await CompteParrainage.findAll({
-                include: [{model: User, attributes:{exclude: ['password']}}]
+                include: [{model: User, attributes:{exclude: ['password']}}, Commande]
             })
         } else {
             comptes = await CompteParrainage.findAll({
             where: {UserId: user.id},
-                include: [{model: User, attributes:{exclude: ['password']}}]
+                include: [{model: User, attributes:{exclude: ['password']}}, Commande]
         })
 
         }
@@ -98,11 +107,12 @@ const getUserCompte = async (req, res, next) => {
     }
 }
 const getAllParrainCompte = async (req, res, next) => {
+    const userId = req.body.userId
     try {
         const allParrains = await CompteParrainage.findAll({
-            include: [{model:User,attributes:{exclude: ['password']}}]
+            include: [{model:User,attributes:{exclude: ['password']}}, Commande]
         })
-        return res.status(200).send(allParrains)
+        return res.status(200).send({comptes:allParrains, userId})
     } catch (e) {
         next(e.message)
     }
@@ -132,8 +142,34 @@ const getUserParrainageData = async (req, res, next) => {
             },
             include: [{model: User, attributes:{exclude: ['password']}}, Commande]
         })
-        const userParrainsStates = {parrainsUser: userParrains, filleulsUser: userFilleuls}
-        const data = {parrains: userParrainsComptes, filleuls: userFilleulsComptes, parrainageState: userParrainsStates}
+            const data = {parrains: userParrainsComptes, filleuls: userFilleulsComptes, userParrainsState:userParrains, userFilleulsState: userFilleuls}
+        return res.status(200).send(data)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
+const sendParrainageRequest = async (req, res, next) => {
+    try {
+        const senderId = req.body.idSender
+        const receiverId = req.body.idReceiver
+            const sender = await User.findByPk(senderId)
+            const receiver = await User.findByPk(receiverId)
+           await sender.addParrain(receiver, {
+                through: {
+                    messageSent: true,
+                    inSponsoring: false,
+                    sponsoringSate: 'pending'
+                }
+            })
+        const selectedCompte = await CompteParrainage.findByPk(req.body.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
+        })
+        const parrains = await sender.getParrains({
+            attributes: {exclude: 'password'}
+        })
+        let updated = parrains.find(item => item.id === receiverId)
+        const data = {compte: selectedCompte, parrain: updated, isParrain: true}
         return res.status(200).send(data)
     } catch (e) {
         next(e.message)
@@ -141,25 +177,34 @@ const getUserParrainageData = async (req, res, next) => {
 }
 
 const respondToParrainageMessage = async (req, res, next) => {
+
     try {
         let selectedFilleulCompte = await ParrainFilleul.findOne({
            where: {
-               parrainId: req.body.UserId
+               filleulId: req.body.UserId,
+               parrainId: req.body.currentUserId
            }
         })
         selectedFilleulCompte.inSponsoring = true
         selectedFilleulCompte.sponsoringState = 'working'
         await selectedFilleulCompte.save()
-        const allParrainageComptes = await CompteParrainage.findAll({
-            include: [{model:User,attributes:{exclude: ['password']}}]
+        const selectedUser = await User.findByPk(req.body.currentUserId)
+
+        const filleuls = await selectedUser.getFilleuls({
+            attributes: {exclude: 'password'}
         })
-        return res.status(200).send(allParrainageComptes)
+        let updatedFilleul = filleuls.find(item => item.id === req.body.UserId)
+        const updatedCompte = await CompteParrainage.findByPk(req.body.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
+        })
+        const data = {compte: updatedCompte, parrain:updatedFilleul, isFilleul: true}
+        return res.status(200).send(data)
     } catch (e) {
         next(e.message)
     }
 }
 
-const getParrainageStopped = async (req, res, next) => {
+const getParrainageManaged = async (req, res, next) => {
     try {
         let selectedCompte = await CompteParrainage.findByPk(req.body.id)
         const compteOrders = await OrderParrain.findAll({
@@ -171,36 +216,65 @@ const getParrainageStopped = async (req, res, next) => {
         if(checkParrainageOrder) return res.status(403).send("Des commandes sont encours pour ce compte")
         let selectedParrainFilleul = await ParrainFilleul.findOne({
             where: {
-                [Op.or]: [{filleulId: req.body.UserId}, {parrainId: req.body.UserId}]
+                filleulId: {
+                    [Op.or]:[req.body.senderId, req.body.receiverId]
+                },
+                parrainId: {
+                    [Op.or]:[req.body.senderId, req.body.receiverId]
+                }
             }
         })
+        if(req.body.label === 'stop') {
         selectedParrainFilleul.inSponsoring = false
-        selectedParrainFilleul.sponsoringState = 'pending'
-        await selectedParrainFilleul.save()
-        const allCompte = await CompteParrainage.findAll({
-            include: [{model:User,attributes:{exclude: ['password']}}]
-        })
-        return res.status(200).send(allCompte)
-    } catch (e) {
-        next(e.message)
-    }
-}
+        selectedParrainFilleul.sponsoringState = 'stopped'
+        }
 
-const getParrainageOrders = async (req, res, next) => {
-    try {
-        const selectedCompte = await CompteParrainage.findOne({
-            where: {
-                UserId: req.body.userId
+        await selectedParrainFilleul.save()
+        const selectedUserCompte = await User.findByPk(req.body.senderId)
+        const userParrains = await selectedUserCompte.getParrains({
+            attributes: {exclude: 'password'}
+        })
+        let itemIsParrain = userParrains.find(item => item.id === req.body.UserId)
+        const userFilleuls = await selectedUserCompte.getFilleuls({
+            attributes: {exclude: 'password'}
+        })
+        let isItemFilleul = userFilleuls.find(item => item.id === req.body.UserId)
+        let updatedCompte;
+        if(itemIsParrain) {
+            updatedCompte = itemIsParrain
+            if(req.body.label === 'remake') {
+                await selectedUserCompte.removeParrain(itemIsParrain)
             }
+        } else {
+            updatedCompte = isItemFilleul
+            if(req.body.label === 'remake') {
+                await selectedUserCompte.removeFilleul(isItemFilleul)
+            }
+        }
+        let isParrain;
+        if(req.body.label === 'remake') {
+            await selectedParrainFilleul.destroy()
+            const selectedReceiver = await User.findByPk(req.body.receiverId)
+            if(!selectedReceiver) return res.status(404).send("ce compte n'existe plus")
+             await selectedUserCompte.addParrain(selectedReceiver, {
+                through: {
+                    messageSent: true,
+                    inSponsoring: false,
+                    sponsoringSate: 'pending'
+                }
+            })
+            const newParrains = await selectedUserCompte.getParrains({
+                attributes: {exclude: 'password'}
+            })
+            updatedCompte = newParrains.find(parrain => parrain.id === req.body.receiverId)
+            isParrain = true
+        }
+
+        const updatedParrainageCompte = await CompteParrainage.findByPk(req.body.id, {
+            include: [{model: User, attributes: {exclude: 'password'}}, Commande]
         })
-        const compteParrain = await CompteParrainage.findAll({
-            where: {
-                UserId: req.body.userId
-            },
-            include:Commande
-        })
-        const compteOrders = await selectedCompte.getCommandes()
-        return res.status(200).send(compteOrders)
+        const data = {compte: updatedParrainageCompte, parrain: updatedCompte, isParrain}
+        return res.status(200).send(data)
     } catch (e) {
         next(e.message)
     }
@@ -215,8 +289,8 @@ module.exports = {
     activeParrainCompte,
     getAllParrainCompte,
     getUserParrainageData,
+    sendParrainageRequest,
     respondToParrainageMessage,
-    getParrainageStopped,
-    getParrainageOrders
+    getParrainageManaged
 
 }

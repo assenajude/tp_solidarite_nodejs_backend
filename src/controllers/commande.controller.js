@@ -130,6 +130,7 @@ const saveOrder = async (req, res, next) => {
             (async function (parrain) {
                 let selectParrain = await CompteParrainage.findByPk(parrain.id)
                 selectParrain.quotite = parrain.quotite - parrain.parrainAction
+                selectParrain.depense = parrain.parrainAction
                 await selectParrain.save()
                 newAdded.addCompteParrainage(selectParrain, {
                     through: {
@@ -225,12 +226,12 @@ getOrdersByUser = async (req,res, next) => {
         const user = decoder(token)
         const isAdmin = user.roles.indexOf('ROLE_ADMIN') !== -1
         if(isAdmin){
-            userOrders = await Commande.findAll({include:[UserAdresse,Plan, CartItem, Facture, Contrat, Livraison],transaction})
+            userOrders = await Commande.findAll({include:[UserAdresse,Plan, CartItem, Facture, Contrat, Livraison],transaction, CompteParrainage})
         } else {
         userOrders = await Commande.findAll({
             where: {UserId: user.id},
             include: [
-                UserAdresse,Plan, CartItem, Facture, Contrat, Livraison
+                UserAdresse,Plan, CartItem, Facture, Contrat, Livraison,CompteParrainage
             ],
             transaction
         })

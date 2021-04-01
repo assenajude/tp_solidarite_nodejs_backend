@@ -110,34 +110,6 @@ const deleteMsgResponse = async (req, res, next) => {
     }
 }
 
-const sendParrainageMessage = async (req, res, next) => {
-    const senderId = req.body.idSender
-    const receiverId = req.body.idReceiver
-    try {
-        const sender = await User.findByPk(senderId)
-        const receiver = await User.findByPk(receiverId)
-    const messageData = sendMessage.parrainageMessage(receiver)
-    let parrainageMessage  = await Message.create({
-        msgHeader: messageData.messageHeader,
-        content: messageData.content
-    })
-    await parrainageMessage.setSender(sender)
-    await parrainageMessage.setReceiver(receiver)
-
-        await receiver.addFilleul(sender, {
-            through: {
-                messageSent: true,
-                inSponsoring: false,
-                sponsoringSate: 'pending'
-            }
-        })
-        return res.status(201).send(parrainageMessage)
-    } catch (e) {
-        next(e.message)
-    }
-
-}
-
 module.exports = {
     respondeToMsg,
     sendMessageToToutPromo,
@@ -146,5 +118,4 @@ module.exports = {
     updateResponse,
     deleteMessage,
     deleteMsgResponse,
-    sendParrainageMessage
 }

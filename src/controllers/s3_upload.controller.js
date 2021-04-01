@@ -3,8 +3,8 @@ const logger = require('../startup/logger')
 
 aws.config.update({
     region: "us-east-1",
-    accessKeyId:"AKIA2BMIRB3XFJZG53EK",
-   secretAccessKey: "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",
+    accessKeyId:process.env.AWS_ACCESS_KEY_ID,
+   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 })
 const S3_BUCKET=process.env.S3_BUCKET
 

@@ -9,6 +9,5 @@ router.patch('/response', messageCtrl.updateResponse)
 router.delete('/response', messageCtrl.deleteMsgResponse)
 router.patch('/update', messageCtrl.getUserMessageRead)
 router.delete('/delete', messageCtrl.deleteMessage)
-router.post('/parrainageMessage', messageCtrl.sendParrainageMessage)
 
 module.exports = router

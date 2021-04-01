@@ -75,24 +75,11 @@ getConnectedUserData = async (req, res, next) => {
     const token = req.headers['x-access-token']
     const user = decoder(token)
     try {
-        const connectedUser = await User.findByPk(user.id)
+        const connectedUser = await User.findByPk(user.id, {
+            attributes: {exclude: ['password']}
+        })
         if(!connectedUser) return res.status(404).send('Utilisateur non trouvé')
-        return res.status(200).send(
-            {
-            username:connectedUser.username,
-            email: connectedUser.email,
-            nom: connectedUser.nom,
-            prenom: connectedUser.prenom,
-            phone: connectedUser.phone,
-            adresse: connectedUser.adresse,
-            avatar: connectedUser.avatar,
-            pieceIdentite: connectedUser.pieceIdentite,
-                profession: connectedUser.profession,
-                domaine: connectedUser.domaine,
-                statusEmploi: connectedUser.statusEmploi,
-                isHero: connectedUser.isHero
-        }
-        )
+        return res.status(200).send(connectedUser)
     } catch (e) {
         next(e.message)
     }

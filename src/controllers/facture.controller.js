@@ -39,7 +39,7 @@ updateFacture = async (req, res, next) => {
         }
         await facture.save()
         const justUpdated = await Facture.findByPk(facture.id, {
-            include: Tranche
+            include: [Commande,Tranche]
         })
         return res.status(200).send(justUpdated)
     } catch (e) {
@@ -77,9 +77,21 @@ getUserFactures = async (req,res, next) => {
     }
 }
 
+const getAllFacture = async (req, res, next) => {
+    try{
+        const allFactures = await Facture.findAll({
+            include: [Commande, Tranche]
+        })
+        return res.status(200).send(allFactures)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
 
 module.exports = {
     createFacture,
     updateFacture,
-    getUserFactures
+    getUserFactures,
+    getAllFacture
 }

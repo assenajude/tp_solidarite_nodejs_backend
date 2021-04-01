@@ -13,7 +13,12 @@ const app = express();
 
 
 if(!process.env.JWT_KEY) {
-    console.error('FATAL ERROR, la clef privée jwt nexiste pas')
+    throw new Error('FATAL ERROR, la clef privée jwt nexiste pas')
+    process.exit(1)
+}
+
+if (!process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_SECRET_ACCESS_KEY){
+    throw new Error("Vous devez configurer s3 avant de continuer.")
     process.exit(1)
 }
 
