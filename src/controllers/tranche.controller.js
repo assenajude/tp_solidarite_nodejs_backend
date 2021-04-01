@@ -3,7 +3,6 @@ const Facture = db.Facture
 const Tranche = db.Tranche
 
 const createTranche = async (req, res, next) => {
-    console.log(req.body)
     const factureId = req.body.factureId
     try{
         let facture = await Facture.findByPk(factureId)

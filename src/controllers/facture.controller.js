@@ -4,6 +4,8 @@ const Op = db.Sequelize.Op
 const Facture = db.Facture
 const Commande = db.Commande
 const Tranche = db.Tranche
+const OrderParrain = db.OrderParrain
+const CompteParrainage = db.CompteParrainage
 const checkConnectedUser = require('../utilities/checkAdminConnect')
 
 const createFacture = async (req, res, next)=> {
@@ -25,6 +27,8 @@ const createFacture = async (req, res, next)=> {
 }
 
 updateFacture = async (req, res, next) => {
+    const token = req.headers['x-access-token']
+    const user = decoder(token)
     try {
         const data = req.body
         let facture = await Facture.findByPk(data.id)
@@ -36,6 +40,27 @@ updateFacture = async (req, res, next) => {
            facture.dateCloture = Date.now()
            facture.ratio = 1
            facture.status = 'soldé'
+            const selectedOrder = await Commande.findByPk(facture.CommandeId)
+            const orderParrainages = await selectedOrder.getCompteParrainages()
+            const montantParraine = selectedOrder.montant - selectedOrder.interet
+            for(let i = 0; i < orderParrainages.length; i++) {
+                const newCompte = orderParrainages[i];
+                (async function (currentCompte) {
+                    let selectedOrderParrain = await OrderParrain.findOne({
+                        CommandeId: selectedOrder.id,
+                        CompteParrainageId: currentCompte.id
+                    })
+                    selectedOrderParrain.ended = true
+                    await selectedOrderParrain.save()
+                    const actionPercent = selectedOrderParrain.action * 100 / montantParraine
+                    const gain = actionPercent * selectedOrder.interet / 100
+                    const aroundGain = Math.round(gain)
+                    let selectedCompteParrainage = await CompteParrainage.findByPk(currentCompte.id)
+                    selectedCompteParrainage.depense = selectedCompteParrainage.depense - selectedOrderParrain.action
+                    selectedCompteParrainage.gain = selectedCompteParrainage.gain + aroundGain
+                    await selectedCompteParrainage.save()
+                })(newCompte)
+            }
         }
         await facture.save()
         const justUpdated = await Facture.findByPk(facture.id, {
