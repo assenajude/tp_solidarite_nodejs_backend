@@ -76,7 +76,46 @@ module.exports = (sequelize, DataTypes) => {
     fidelitySeuil: {
       type: DataTypes.INTEGER,
       defaultValue: 0
-    }
+    },
+    articleCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    locationCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    serviceCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    propositionCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    parrainageCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    helpCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    factureCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    favoriteCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    messageCompter: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    resetToken: {
+      type: DataTypes.STRING
+    },
   }, {
     sequelize,
     modelName: 'User',

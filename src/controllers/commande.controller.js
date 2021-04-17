@@ -1,6 +1,7 @@
 
 const db = require('../../db/models/index');
 const decoder = require('jwt-decode')
+const generateRandom = require('../utilities/generateRandom')
 const sendMail = require('../utilities/sendEmail')
 const Commande = db.Commande;
 const UserAdresse = db.UserAdresse;
@@ -29,7 +30,10 @@ const saveOrder = async (req, res, next) => {
         let statusAccord = '';
         let user = await User.findByPk(connectedUser.id)
         if(!user) return res.status(404).send("l'utlisateur n'a pas été trouvé")
-        const userAdresse = await UserAdresse.findByPk(currentOrder.userAdresseId, )
+        let userAdresse;
+        if(currentOrder.userAdresseId) {
+          userAdresse = await UserAdresse.findByPk(currentOrder.userAdresseId)
+        }
         const plan = await Plan.findByPk(currentOrder.planId, {include: Payement})
         const modePayement = plan.Payement.mode
         if(modePayement.toLowerCase() === 'cash') {
@@ -39,9 +43,9 @@ const saveOrder = async (req, res, next) => {
         }
         const allSaved = await Commande.findAll();
         const ordersNums = allSaved.map(order => order.numero)
-        const min = 1000000000
-        const max = 9999999999
-        const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+        const min = 100000
+        const max = 999999
+        const randomNumber = generateRandom(min, max)
         let lastCheck = false
         do {
         ordersNums.forEach(num => {
@@ -101,13 +105,16 @@ const saveOrder = async (req, res, next) => {
                     })(newItem)
                 })(i)
             }
+            user.articleCompter+=1
             await userShoppingCart.setArticles([])
         } else if(order.typeCmde === 'location') {
             let selectedLocation = await Location.findByPk(items[0].id)
             selectedLocation.qteDispo -= items[0].quantite
+            user.locationCompter +=1
             await selectedLocation.save()
             await userShoppingCart.setLocations([])
         } else {
+            user.serviceCompter += 1
             await userShoppingCart.setServices([])
         }
 
@@ -121,9 +128,8 @@ const saveOrder = async (req, res, next) => {
 
         if(modePayement.toLowerCase() === 'cash') {
             user.fidelitySeuil += newAdded.montant
-            await user.save()
         }
-
+        await user.save()
         const parrainsTab = req.body.parrains
         for(let i = 0; i<parrainsTab.length; i++) {
             const newParrain = parrainsTab[i];
@@ -165,7 +171,7 @@ updateOrder = async (req, res, next) => {
     let messageContent;
     try{
         let order = await Commande.findByPk(req.body.orderId)
-        const currentUser = await User.findByPk(order.UserId)
+        let currentUser = await User.findByPk(order.UserId)
         const receiverName = currentUser.nom
         const receiverSubname = currentUser.prenom
         const receiverFullname = `${receiverName} ${receiverSubname}`
@@ -193,12 +199,6 @@ updateOrder = async (req, res, next) => {
             messageContent = message
         }
 
-        if(req.body.expireIn) {
-            order.expireIn = req.body.expireIn
-            const {msghHeader, message} = sendMessage.expireInMessage(currentUser, order.numero, req.body.expireIn)
-            messageHeader = msghHeader
-            messageContent = message
-        }
         let createdMessage = await Message.create({
             msgHeader: messageHeader,
             content: messageContent
@@ -206,11 +206,13 @@ updateOrder = async (req, res, next) => {
 
         await createdMessage.setSender(mainUser)
         await createdMessage.setReceiver(currentUser)
+        currentUser.messageCompter += 1
+        await currentUser.save()
         createdMessage.reference = order.numero
         await createdMessage.save()
         await order.save()
         const updatedOrder = await Commande.findByPk(order.id, {
-            include: [UserAdresse, Plan, CartItem, Facture, Contrat]
+            include: [UserAdresse, Plan, CartItem, Facture, Contrat, {model: User, attributes: {exclude: 'password'}}]
         })
         return res.status(200).send(updatedOrder)
     } catch (e) {

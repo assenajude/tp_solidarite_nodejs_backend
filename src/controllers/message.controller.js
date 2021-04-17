@@ -2,10 +2,8 @@ const db = require('../../db/models')
 const Op = db.Sequelize.Op
 const Message = db.Message
 const MsgResponse = db.MsgResponse
-const ParrainFilleul = db.ParrainFilleul
 const User = db.User
 const decoder = require('jwt-decode')
-const sendMessage = require('../utilities/sendMessage')
 
 
 const getUserMessage = async(req, res, next) => {
@@ -68,7 +66,9 @@ const respondeToMsg = async (req, res, next)=> {
             respHeader: req.body.title,
             respContent: req.body.reponse
         })
-
+        let receiverUser = await User.findByPk(selectedMsg.senderId)
+        receiverUser.messageCompter += 1
+        await receiverUser.save()
         return res.status(200).send(newResponse)
     } catch (e) {
         next(e.message)

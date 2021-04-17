@@ -1,5 +1,4 @@
 const aws = require('aws-sdk')
-const logger = require('../startup/logger')
 
 aws.config.update({
     region: "us-east-1",

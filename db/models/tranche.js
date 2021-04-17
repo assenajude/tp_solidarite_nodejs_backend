@@ -26,10 +26,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     solde: {
       type: DataTypes.INTEGER,
-    defaultValue: 0},
+    defaultValue: 0
+    },
     payed: {
       type: DataTypes.BOOLEAN,
-    defaultValue: false}
+    defaultValue: false
+    },
+    payedState: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Tranche',

@@ -27,10 +27,21 @@ const orderSuccessMail = (user, items,frais, interet, montant) => {
             }
         ]
     }).catch(err => logger.error(err))
-
 }
 
+const resetUserInfo = (code, userEmail) => {
+    const messageData = {
+     to: userEmail,
+     from: 'toutpromo0@gmail.com',
+     subject: 'code de réinitialisation',
+     html: `Cher client pour la reinitialisation de vos informations, veuillez noter ce code "<strong>${code}</strong>"
+           puis utiliser le lien 'username / mot de passe oublié' dans l'interface de connexion de toutpromo.`
+    }
+    sgMail.send(messageData).catch(error => {
+        logger.error(error)})
+}
 
 module.exports = {
-    orderSuccessMail
+    orderSuccessMail,
+    resetUserInfo
 }

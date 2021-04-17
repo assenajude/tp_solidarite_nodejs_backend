@@ -55,6 +55,9 @@ const giveResponse = async (req, res, next) => {
         const response = await selectedQuestion.createResponse({
             content: req.body.content
         })
+        const user = await User.findByPk(selectedQuestion.UserId)
+        user.helpCompter += 1
+        await user.save()
         return res.status(200).send(response)
     } catch (e) {
         next(e.message)

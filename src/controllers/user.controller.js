@@ -105,7 +105,7 @@ toggleUserFavoris = async (req, res, next) => {
     const token = req.headers['x-access-token']
     const connectedUser = decoder(token)
     try {
-        const user = await User.findByPk(connectedUser.id)
+        let user = await User.findByPk(connectedUser.id)
         const product = req.body
         let selected;
         const productKeys = Object.keys(product)
@@ -120,6 +120,7 @@ toggleUserFavoris = async (req, res, next) => {
                 await user.removeArticle(product.id)
             } else {
                await user.addArticle(product.id)
+                user.favoriteCompter += 1
             }
          selected = await Article.findByPk(product.id, {
              include: Categorie
@@ -130,17 +131,41 @@ toggleUserFavoris = async (req, res, next) => {
                 await user.removeLocation(product.id)
             } else {
                await user.addLocation(product.id)
+                user.favoriteCompter += 1
 
             }
         selected = await Location.findByPk(product.id, {
             include: Categorie
         })
         }
+        await user.save()
         return res.status(200).send(selected)
     } catch (e) {
         next(e.message)
     }
 
+}
+
+const resetCompter = async (req, res, next) => {
+    try {
+        let user  = await User.findByPk(req.body.userId)
+        if(req.body.helpCompter) user.helpCompter = 0
+        if(req.body.messageCompter) user.messageCompter -= 1
+        if(req.body.favoriteCompter) user.favoriteCompter = 0
+        if(req.body.factureCompter) user.factureCompter = 0
+        if(req.body.articleCompter) user.articleCompter = 0
+        if(req.body.locationCompter) user.locationCompter = 0
+        if(req.body.serviceCompter) user.serviceCompter = 0
+        if(req.body.propositionCompter) user.propositionCompter = 0
+        if(req.body.parrainageCompter) user.parrainageCompter -= 1
+        await user.save()
+        const updatedUser = await User.findByPk(user.id, {
+            attributes:{exclude: ['password']}
+        })
+        return res.status(200).send(updatedUser)
+    } catch (e) {
+        next(e.message)
+    }
 }
 
 module.exports = {
@@ -150,5 +175,6 @@ module.exports = {
     getUserProfileAvatar,
     getConnectedUserData,
     getUserFavoris,
-    toggleUserFavoris
+    toggleUserFavoris,
+    resetCompter
 }

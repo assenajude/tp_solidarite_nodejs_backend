@@ -55,6 +55,14 @@ const editProposition = async (req, res, next) => {
             referenceId: req.body.idReference,
             typeReference: req.body.type
         })
+        const allUser = await User.findAll()
+        for(let i = 0; i<allUser.length; i++) {
+            let newUser = allUser[i];
+            (async function (currentUser) {
+                currentUser.propositionCompter += 1
+                await currentUser.save()
+            })(newUser)
+        }
         return res.status(200).send(updated)
     } catch (e) {
         next(e.message)

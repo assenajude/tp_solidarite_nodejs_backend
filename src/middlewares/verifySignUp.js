@@ -10,7 +10,6 @@ checkDuplicateEmailOrUsername = async (req, res, next) => {
             }
         });
         if (user) return res.status(400).send(`le pseudo ${req.body.username} est deja utilisé`);
-
         const user2 = await User.findOne({
             where: {
                 email: req.body.email
@@ -36,7 +35,6 @@ checkRolesExisted = (req, res, next) => {
         }
         next();
 };
-
 
 module.exports = {
     checkDuplicateEmailOrUsername,

@@ -153,8 +153,8 @@ const sendParrainageRequest = async (req, res, next) => {
     try {
         const senderId = req.body.idSender
         const receiverId = req.body.idReceiver
-            const sender = await User.findByPk(senderId)
-            const receiver = await User.findByPk(receiverId)
+            let sender = await User.findByPk(senderId)
+            let receiver = await User.findByPk(receiverId)
            await sender.addParrain(receiver, {
                 through: {
                     messageSent: true,
@@ -162,12 +162,15 @@ const sendParrainageRequest = async (req, res, next) => {
                     sponsoringSate: 'pending'
                 }
             })
+        receiver.parrainageCompter += 1
+        await receiver.save()
         const selectedCompte = await CompteParrainage.findByPk(req.body.id, {
             include: [{model: User, attributes: {exclude: 'password'}}, Commande]
         })
         const parrains = await sender.getParrains({
             attributes: {exclude: 'password'}
         })
+
         let updated = parrains.find(item => item.id === receiverId)
         const data = {compte: selectedCompte, parrain: updated, isParrain: true}
         return res.status(200).send(data)
@@ -188,8 +191,12 @@ const respondToParrainageMessage = async (req, res, next) => {
         selectedFilleulCompte.inSponsoring = true
         selectedFilleulCompte.sponsoringState = 'working'
         await selectedFilleulCompte.save()
-        const selectedUser = await User.findByPk(req.body.currentUserId)
-
+        let selectedFilleulUser = await User.findByPk(req.body.UserId)
+        selectedFilleulUser.parrainageCompter += 1
+        await selectedFilleulUser.save()
+        let selectedUser = await User.findByPk(req.body.currentUserId)
+        selectedUser.parrainageCompter -= 1
+        await selectedUser.save()
         const filleuls = await selectedUser.getFilleuls({
             attributes: {exclude: 'password'}
         })
@@ -266,6 +273,9 @@ const getParrainageManaged = async (req, res, next) => {
             const newParrains = await selectedUserCompte.getParrains({
                 attributes: {exclude: 'password'}
             })
+            let ownerUser = User.findByPk(req.body.UserId)
+            ownerUser.parrainageCompter += 1
+            await ownerUser.save()
             updatedCompte = newParrains.find(parrain => parrain.id === req.body.receiverId)
             isParrain = true
         }

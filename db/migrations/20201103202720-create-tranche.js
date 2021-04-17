@@ -26,6 +26,9 @@ module.exports = {
       payed: {
         type: Sequelize.BOOLEAN
       },
+      payedState: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -2,6 +2,7 @@ const decoder = require('jwt-decode')
 const db = require('../../db/models/index')
 const Op = db.Sequelize.Op
 const Facture = db.Facture
+const User = db.User
 const Commande = db.Commande
 const Tranche = db.Tranche
 const OrderParrain = db.OrderParrain
@@ -20,6 +21,9 @@ const createFacture = async (req, res, next)=> {
             montant: req.body.montant,
             typeFacture: req.body.type
         })
+        let user = await User.findByPk(commande.UserId)
+        user.factureCompter += 1
+        await user.save()
         res.status(201).send(facture)
     } catch (e) {
         next(e.message)
@@ -27,8 +31,6 @@ const createFacture = async (req, res, next)=> {
 }
 
 updateFacture = async (req, res, next) => {
-    const token = req.headers['x-access-token']
-    const user = decoder(token)
     try {
         const data = req.body
         let facture = await Facture.findByPk(data.id)
@@ -43,12 +45,15 @@ updateFacture = async (req, res, next) => {
             const selectedOrder = await Commande.findByPk(facture.CommandeId)
             const orderParrainages = await selectedOrder.getCompteParrainages()
             const montantParraine = selectedOrder.montant - selectedOrder.interet
+
             for(let i = 0; i < orderParrainages.length; i++) {
                 const newCompte = orderParrainages[i];
                 (async function (currentCompte) {
                     let selectedOrderParrain = await OrderParrain.findOne({
-                        CommandeId: selectedOrder.id,
-                        CompteParrainageId: currentCompte.id
+                        where :{
+                            CommandeId: selectedOrder.id,
+                            CompteParrainageId: currentCompte.id
+                        }
                     })
                     selectedOrderParrain.ended = true
                     await selectedOrderParrain.save()
@@ -56,8 +61,9 @@ updateFacture = async (req, res, next) => {
                     const gain = actionPercent * selectedOrder.interet / 100
                     const aroundGain = Math.round(gain)
                     let selectedCompteParrainage = await CompteParrainage.findByPk(currentCompte.id)
-                    selectedCompteParrainage.depense = selectedCompteParrainage.depense - selectedOrderParrain.action
-                    selectedCompteParrainage.gain = selectedCompteParrainage.gain + aroundGain
+                    selectedCompteParrainage.quotite += selectedOrderParrain.action
+                    selectedCompteParrainage.depense -=  selectedOrderParrain.action
+                    selectedCompteParrainage.gain += aroundGain
                     await selectedCompteParrainage.save()
                 })(newCompte)
             }
