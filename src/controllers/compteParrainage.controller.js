@@ -301,6 +301,6 @@ module.exports = {
     getUserParrainageData,
     sendParrainageRequest,
     respondToParrainageMessage,
-    getParrainageManaged
+    getParrainageManaged,
 
 }

@@ -168,6 +168,19 @@ const resetCompter = async (req, res, next) => {
     }
 }
 
+const resetParrainCompter = async (req, res, next) => {
+    try {
+        let currentUser = await User.findByPk(req.body.currentUserId)
+        if(!currentUser) return res.status(404).send('Vous netes pas connecté')
+        currentUser.parrainageCompter = 0
+        await currentUser.save()
+        return res.status(200).send(currentUser)
+    } catch (e) {
+        next(e.message)
+    }
+}
+
+
 module.exports = {
     updateProfile,
     addUserAvatar,
@@ -176,5 +189,6 @@ module.exports = {
     getConnectedUserData,
     getUserFavoris,
     toggleUserFavoris,
-    resetCompter
+    resetCompter,
+    resetParrainCompter
 }

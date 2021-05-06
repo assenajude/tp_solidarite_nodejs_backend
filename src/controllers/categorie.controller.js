@@ -14,9 +14,9 @@ createCategorie = async (req, res, next) => {
         if(!selectedEspace) return res.status(404).send('Vous devez choisir un espace pour ajouter une categorie')
         let categorie = await selectedEspace.createCategorie(newCategorie);
         let type = ''
-        if(selectedEspace.nom === 'e-commerce') {
+        if(selectedEspace.nom.toLowerCase() === 'e-commerce') {
             type = 'article'
-        } else if(selectedEspace.nom === 'e-location'){
+        } else if(selectedEspace.nom.toLowerCase() === 'e-location'){
             type = 'location'
         } else {
             type = 'service'
