@@ -12,6 +12,6 @@ router.post('/parrainageData',userToken.verifyToken,compteParrainCtrl.getUserPar
 router.patch('/editInitial',userToken.verifyToken, compteParrainCtrl.editInitialFund)
 router.patch('/editQuotite',userToken.verifyToken, compteParrainCtrl.editQuotiteFund)
 router.post('/userCompte',userToken.verifyToken, compteParrainCtrl.getUserCompte)
-router.post('/userCompte',userToken.verifyToken, compteParrainCtrl.getUserCompte)
+router.patch('/activeCompte',[userToken.verifyToken, userToken.isAdmin], compteParrainCtrl.activeParrainCompte)
 
 module.exports = router
