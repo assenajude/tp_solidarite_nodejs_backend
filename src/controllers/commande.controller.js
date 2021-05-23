@@ -135,8 +135,8 @@ const saveOrder = async (req, res, next) => {
             const newParrain = parrainsTab[i];
             (async function (parrain) {
                 let selectParrain = await CompteParrainage.findByPk(parrain.id)
-                selectParrain.quotite = selectParrain.quotite - parrain.parrainAction
-                selectParrain.depense = selectParrain.depense + parrain.parrainAction
+                selectParrain.quotite -= parrain.parrainAction
+                selectParrain.depense += parrain.parrainAction
                 await selectParrain.save()
                 newAdded.addCompteParrainage(selectParrain, {
                     through: {
