@@ -1,6 +1,8 @@
 const db = require('../../db/models')
 const Categorie = db.Categorie
 const Service = db.Service
+const dataSorter = require('../utilities/dataSorter')
+
 
 createService = async (req, res, next) => {
     const idCategorie = req.body.categoryId;
@@ -39,7 +41,8 @@ getServices = async (req, res, next) => {
         const services = await Service.findAll({
             include: Categorie
         })
-        res.status(200).send(services)
+        const sortedServices = dataSorter(services)
+        res.status(200).send(sortedServices)
     } catch (e) {
         next(e.message)
     }

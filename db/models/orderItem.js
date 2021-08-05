@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false
     },
+    productId: DataTypes.INTEGER,
+    productType: DataTypes.STRING,
     libelle: DataTypes.STRING,
     image: DataTypes.STRING,
     prix: {

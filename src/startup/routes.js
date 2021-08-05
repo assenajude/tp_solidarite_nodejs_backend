@@ -20,7 +20,6 @@ const shoppingCartRoutes = require('../routes/shoppingCart.routes')
 const optionRoutes = require('../routes/option.routes')
 const propositionRoutes  = require('../routes/proposition.route')
 const faqRoutes = require('../routes/faq.routes')
-const messageRoutes = require('../routes/message.routes')
 const s3Routes = require('../routes/s3_upload.routes')
 const compteParrainRoutes = require('../routes/compteParrainage.routes')
 
@@ -47,7 +46,6 @@ module.exports = function routes(app) {
     app.use('/api/options', optionRoutes)
     app.use('/api/propositions', propositionRoutes)
     app.use('/api/faq', faqRoutes)
-    app.use('/api/messages', messageRoutes)
     app.use('/api/uploadFile', s3Routes)
     app.use('/api/compteParrainages', compteParrainRoutes)
 }

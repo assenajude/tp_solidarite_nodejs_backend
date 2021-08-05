@@ -150,7 +150,6 @@ const resetCompter = async (req, res, next) => {
     try {
         let user  = await User.findByPk(req.body.userId)
         if(req.body.helpCompter) user.helpCompter = 0
-        if(req.body.messageCompter) user.messageCompter -= 1
         if(req.body.favoriteCompter) user.favoriteCompter = 0
         if(req.body.factureCompter) user.factureCompter = 0
         if(req.body.articleCompter) user.articleCompter = 0
@@ -179,8 +178,6 @@ const resetParrainCompter = async (req, res, next) => {
         next(e.message)
     }
 }
-
-
 module.exports = {
     updateProfile,
     addUserAvatar,

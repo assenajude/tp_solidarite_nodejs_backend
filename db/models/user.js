@@ -35,14 +35,6 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'propositionId'
       })
       User.hasMany(models.Question)
-      User.hasMany(models.Message, {
-        as: 'receiver',
-        foreignKey: 'receiverId'
-      })
-      User.hasMany(models.Message, {
-        as: 'sender',
-        foreignKey: 'senderId'
-      })
       User.hasOne(models.CompteParrainage)
       User.belongsToMany(models.User, {
         as: 'Parrains',
@@ -106,10 +98,6 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     favoriteCompter: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    messageCompter: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },

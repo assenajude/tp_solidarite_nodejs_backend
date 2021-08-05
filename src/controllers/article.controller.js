@@ -2,6 +2,7 @@ const db = require('../../db/models');
 const Article = db.Article;
 const Categorie = db.Categorie;
 const ProductOption = db.ProductOption
+const dataSorter = require('../utilities/dataSorter')
 
 createArticle = async (req, res, next) => {
     const idCategorie = req.body.categorieId;
@@ -14,7 +15,10 @@ createArticle = async (req, res, next) => {
         prixPromo: req.body.prixPromo,
         imagesArticle: req.body.articleImagesLinks,
         aide: req.body.aide,
-        descripArticle: req.body.description
+        descripArticle: req.body.description,
+        flashPromo: req.body.flashPromo,
+        debutFlash: req.body.debutPromo,
+        finFlash : req.body.finPromo
     };
     try {
         let categorie = await Categorie.findByPk(idCategorie);
@@ -37,10 +41,11 @@ createArticle = async (req, res, next) => {
 
 getAllArticles = async (req, res, next) => {
     try {
-        const articles = await Article.findAll({
+        let articles = await Article.findAll({
             include: [Categorie, ProductOption]
         });
-        res.status(200).send(articles)
+        const sortedArticles = dataSorter(articles)
+        res.status(200).send(sortedArticles)
     } catch (e) {
         next(e)
     }
@@ -71,7 +76,10 @@ editArticle = async (req, res, next) => {
             prixPromo: req.body.prixPromo,
             imagesArticle: articleImagesLinks,
             aide: req.body.aide,
-            descripArticle: req.body.description
+            descripArticle: req.body.description,
+            flashPromo: req.body.flashPromo,
+            debutFlash: req.body.debutPromo,
+            finFlash : req.body.finPromo
         })
         await updatedArticle.setCategorie(categorie)
         return res.status(200).send(updatedArticle)

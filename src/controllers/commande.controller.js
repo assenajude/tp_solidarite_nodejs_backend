@@ -14,10 +14,8 @@ const Contrat = db.Contrat
 const ShoppingCart = db.ShoppingCart
 const Article = db.Article
 const Location = db.Location
-const Message = db.Message
 const Livraison = db.Livraison
 const CompteParrainage = db.CompteParrainage
-const sendMessage = require('../utilities/sendMessage')
 
 
 const saveOrder = async (req, res, next) => {
@@ -82,12 +80,13 @@ const saveOrder = async (req, res, next) => {
                (async function(item) {
                    await order.createCartItem(item.id, {
                        through: {
+                           productId: item.id,
+                           productType: item.typeCmde,
                            libelle: item.libelle,
                            image: item.image,
                            prix: item.prix,
                            quantite: item.quantite,
                            montant: item.montant,
-
                        }
                    })
                })(newItem)
@@ -167,49 +166,23 @@ deleteOrder = async (req, res, next) => {
 }
 
 updateOrder = async (req, res, next) => {
-    let messageHeader;
-    let messageContent;
     try{
         let order = await Commande.findByPk(req.body.orderId)
         let currentUser = await User.findByPk(order.UserId)
-        const receiverName = currentUser.nom
-        const receiverSubname = currentUser.prenom
-        const receiverFullname = `${receiverName} ${receiverSubname}`
-        let mainUser = await User.findByPk(1)
         if(!order) return res.status(404).send(`La commande que vous voulez modifier n'exite pas`)
         if (req.body.statusAccord) {
             order.statusAccord = req.body.statusAccord
-            const {msgHeader, message} = sendMessage.accordMessage(req.body.statusAccord,receiverFullname, order.dateCmde)
-            messageHeader = msgHeader
-            messageContent = message
         }
         if (req.body.statusLivraison) {
         order.statusLivraison = req.body.statusLivraison
         order.dateLivraisonFinal = Date.now()
-            const {msgHeader, message} = sendMessage.livraisonMessage(req.body.statusLivraison, currentUser, order.numero)
-            messageHeader = msgHeader
-            messageContent = message
         }
         if(req.body.history) order.historique = req.body.history
 
         if(req.body.isExpired) {
             order.isExpired = req.body.isExpired
-            const {msgHeader, message} = sendMessage.expiredMessage(currentUser, order.numero)
-            messageHeader = msgHeader
-            messageContent = message
         }
-
-        let createdMessage = await Message.create({
-            msgHeader: messageHeader,
-            content: messageContent
-        })
-
-        await createdMessage.setSender(mainUser)
-        await createdMessage.setReceiver(currentUser)
-        currentUser.messageCompter += 1
         await currentUser.save()
-        createdMessage.reference = order.numero
-        await createdMessage.save()
         await order.save()
         const updatedOrder = await Commande.findByPk(order.id, {
             include: [UserAdresse, Plan, CartItem, Facture, Contrat, {model: User, attributes: {exclude: 'password'}}]

@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     numero: DataTypes.STRING,
     dateEmission: {
       type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW},
+    defaultValue: DataTypes.NOW
+    },
     dateEcheance: DataTypes.DATE,
     montant: {
       type: DataTypes.INTEGER,

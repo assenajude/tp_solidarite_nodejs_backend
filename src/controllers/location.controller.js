@@ -2,6 +2,7 @@ const db = require('../../db/models/index');
 const Categorie = db.Categorie;
 const Location = db.Location
 const ProductOption = db.ProductOption
+const dataSorter = require('../utilities/dataSorter')
 
 addNewLocation = async (req, res, next) => {
     const idCategorie = req.body.categoryId
@@ -46,7 +47,8 @@ getAllLocations = async (req, res, next) => {
         const locations = await Location.findAll({
             include: [Categorie, ProductOption]
         })
-        return res.status(200).send(locations)
+        const sortedLocations = dataSorter(locations)
+        return res.status(200).send(sortedLocations)
     } catch (e) {
       next(e.message)
     }

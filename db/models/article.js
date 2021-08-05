@@ -39,6 +39,12 @@ module.exports = (sequelize, DataTypes) => {
     codeArticle: DataTypes.STRING,
     designArticle: DataTypes.STRING,
     descripArticle: DataTypes.STRING,
+    flashPromo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    debutFlash: DataTypes.DATE,
+    finFlash: DataTypes.DATE,
     qteStock: {
       type: DataTypes.INTEGER,
       defaultValue: 0
