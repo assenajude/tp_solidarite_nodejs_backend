@@ -16,8 +16,18 @@ createPlan = async (req, res, next) => {
     try {
             let payement = await Payement.findByPk(idPayement);
             if (!payement) return res.status(404).send(`Le payement d'id ${idPayement} n'a pas été trouvé`)
-            const newPlan = await payement.createPlan(data)
-  return res.status(201).send(newPlan)
+        let newPlan;
+        if(req.body.planId) {
+            newPlan = await Plan.findByPk(req.body.planId)
+            if(!newPlan)return res.status(404).send({message: "Plan non trouvé"})
+            await newPlan.update(data)
+        }else {
+            newPlan = await payement.createPlan(data)
+        }
+        const justAdded = await Plan.findByPk(newPlan.id, {
+            include: Payement
+        })
+        return res.status(201).send(justAdded)
     } catch (e) {
         next(e.message)
     }
@@ -36,8 +46,20 @@ getAllPlan = async (req, res, next) => {
 
 }
 
+const deletePlan = async (req, res, next) => {
+    try{
+        const selectedPlan = await Plan.findByPk(req.body.planId)
+        if(!selectedPlan) return res.status(404).send({message: "Plan non trouvé"})
+        await selectedPlan.destroy()
+        return res.status(200).send({planId: req.body.planId})
+    } catch (e) {
+        next(e)
+    }
+}
+
 
 module.exports = {
     createPlan,
-    getAllPlan
+    getAllPlan,
+    deletePlan
 }

@@ -7,6 +7,7 @@ const OrderParrain = db.OrderParrain
 const Op = db.Sequelize.Op
 const decoder = require('jwt-decode')
 const isAdmin = require('../utilities/checkAdminConnect')
+const {sendPushNotification} = require('../utilities/pushNotification')
 
 const createCompteParrainage = async (req, res, next) => {
     const idUser = req.body.userId
@@ -76,6 +77,11 @@ const activeParrainCompte = async (req, res, next) => {
         const activatedCompte = await CompteParrainage.findByPk(selectedParrainCompte.id, {
             include: [{model: User, attributes: {exclude: 'password'}}, Commande]
         })
+        const currentUser = activatedCompte.User
+        if(currentUser.pushNotificationToken) {
+            const userData = currentUser.username?currentUser.username : currentUser.nom?currentUser.nom : ''
+            sendPushNotification(`Bonjour ${userData}, votre compte de parrainage a été activé.`, [currentUser.pushNotificationToken], 'Compte de parrainage activé', {notifType: 'parrainage', info: 'activation'})
+        }
         return res.status(200).send(activatedCompte)
     } catch (e) {
         next(e.message)
@@ -173,6 +179,11 @@ const sendParrainageRequest = async (req, res, next) => {
 
         let updated = parrains.find(item => item.id === receiverId)
         const data = {compte: selectedCompte, parrain: updated, isParrain: true}
+        if(receiver.pushNotificationToken) {
+            const userData = receiver.username?receiver.username: receiver.nom?receiver.email: ''
+            const senderName = sender.username?sender.username : sender.nom?sender.nom : ''
+            sendPushNotification(`Bonjour ${userData}, ${senderName} vous a envoyé une demande de parrainage`, [receiver.pushNotificationToken], 'Demande de parrainage', {notifType: 'parrainage', info: 'demande'})
+        }
         return res.status(200).send(data)
     } catch (e) {
         next(e.message)
@@ -205,6 +216,11 @@ const respondToParrainageMessage = async (req, res, next) => {
             include: [{model: User, attributes: {exclude: 'password'}}, Commande]
         })
         const data = {compte: updatedCompte, parrain:updatedFilleul, isFilleul: true}
+        if(selectedFilleulUser.pushNotificationToken) {
+            const userData = selectedFilleulUser.username?selectedFilleulUser.username : selectedFilleulUser.nom?selectedFilleulUser.nom : ''
+            const senderData = selectedUser.username?selectedUser.username : selectedUser.nom?selectedUser.nom : ''
+            sendPushNotification(`Bonjour ${userData}, ${senderData} a repondu à votre demande de parrainage`, [selectedFilleulUser.pushNotificationToken], 'Reponse demande de parrainage', {notifType: 'parrainage', info: 'demande'})
+        }
         return res.status(200).send(data)
     } catch (e) {
         next(e.message)

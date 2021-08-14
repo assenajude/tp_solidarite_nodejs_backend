@@ -7,7 +7,6 @@ const User = db.User
 
 const addUserAdresse = async (req, res, next) => {
     const token = req.headers['x-access-token']
-    if(!token || token === 'null') return res.status(401).send("Veuillez vous connecter pour ajouter les adresses")
     const connectedUser = decoder(token)
     const pointId = req.body.relaisId;
     const newAdresse = {
@@ -17,24 +16,26 @@ const addUserAdresse = async (req, res, next) => {
         adresse: req.body.adresse
     };
 
-    const transaction = await db.sequelize.transaction()
-
     try {
-        const point = await PointRelais.findByPk(pointId, {transaction});
-        let user = await User.findByPk(connectedUser.id, {transaction})
+        const point = await PointRelais.findByPk(pointId);
+        let user = await User.findByPk(connectedUser.id)
         if (!user) return res.status(404).send(`l'utilisateur d'id ${connectedUser.id} n'a pas été trouvé`);
         if (!point) return res.status(404).send(`le point relais d'id ${pointId} n'a pas été trouvé`);
-        let newUserAdresse = await UserAdresse.create(newAdresse, {transaction});
-        await newUserAdresse.setPointRelai(point, {transaction})
-        await newUserAdresse.setUser(user, {transaction})
+        let newUserAdresse
+            if(req.body.adresseId) {
+                newUserAdresse = await UserAdresse.findByPk(req.body.adresseId)
+                await newUserAdresse.update(newAdresse)
+            }else{
+                newUserAdresse = await UserAdresse.create(newAdresse);
+
+            }
+        await newUserAdresse.setPointRelai(point)
+        await newUserAdresse.setUser(user)
         const newAdded = await UserAdresse.findByPk(newUserAdresse.id, {
-            include:[ PointRelais, User],
-            transaction
+            include:[ PointRelais, User]
         })
-        await transaction.commit()
         return res.status(201).send(newAdded)
     } catch (e) {
-        await transaction.rollback()
         next(e.message)
     }
 };

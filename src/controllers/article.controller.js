@@ -69,28 +69,29 @@ editArticle = async (req, res, next) => {
         if(!categorie) return res.status(404).send('categorie introuvable')
         let article = await Article.findByPk(articleId)
         if(!article) return res.status(404).send('article introuvable')
-        const updatedArticle = await article.update({
+        await article.update({
             designArticle: req.body.designation,
             qteStock: req.body.quantite,
             prixReel: req.body.prixReel,
             prixPromo: req.body.prixPromo,
-            imagesArticle: articleImagesLinks,
+            imagesArticle: req.body.articleImagesLinks,
             aide: req.body.aide,
             descripArticle: req.body.description,
             flashPromo: req.body.flashPromo,
             debutFlash: req.body.debutPromo,
             finFlash : req.body.finPromo
         })
-        await updatedArticle.setCategorie(categorie)
-        return res.status(200).send(updatedArticle)
+        await article.setCategorie(categorie)
+        return res.status(200).send(article)
     } catch (e) {
         next(e)
     }
 }
 
+
 module.exports = {
     createArticle,
     getAllArticles,
     getOneArticle,
-    editArticle
+    editArticle,
 }

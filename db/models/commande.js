@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.NOW
     },
     dateLivraisonDepart: DataTypes.DATE,
+    accordValidationDate: DataTypes.DATE,
     statusLivraison: {
       type: DataTypes.STRING,
       defaultValue: "En cours"

@@ -19,12 +19,19 @@ createService = async (req, res, next) => {
     try {
         let categorie = await Categorie.findByPk(idCategorie);
         if (!categorie) return res.status(404).send(`la categorie d'id ${idCategorie} n'a pas été trouvé`);
-        let service = await Service.create(serviceData);
+        let service;
+        if(req.body.serviceId) {
+            service = await Service.findByPk(req.body.serviceId)
+            if(!service) return res.status(404).send({message: "Service non trouvé"})
+            await service.update(serviceData)
+        }else {
+            service = await Service.create(serviceData);
+            const allServices = await Service.findAll()
+            incrementService = allServices.length
+            service.codeService = `SVC000${incrementService}`
+            await service.save()
+        }
         await service.setCategorie(categorie)
-        const allServices = await Service.findAll()
-        incrementService = allServices.length
-        service.codeService = `SVC000${incrementService}`
-        await service.save()
         const newService = await Service.findOne({
             where: {id: service.id},
             include: Categorie
@@ -48,8 +55,20 @@ getServices = async (req, res, next) => {
     }
 }
 
+const deleteService = async (req, res, next) => {
+    try{
+        let selectedService = await Service.findByPk(req.body.id)
+        if(!selectedService)return res.status(404).send({message: "Service non trouvé"})
+        await selectedService.destroy()
+        return res.status(200).send({serviceId: req.body.id})
+    } catch (e) {
+        next(e)
+    }
+}
+
 
 module.exports = {
     createService,
-    getServices
+    getServices,
+    deleteService
 }

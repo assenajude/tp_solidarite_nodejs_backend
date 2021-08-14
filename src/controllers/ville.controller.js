@@ -24,7 +24,7 @@ const addVille = async (req, res, next) => {
 getAllVilles = async (req, res, next) => {
     try{
         const villes = await Ville.findAll({
-            include: Relais
+            include: [Relais, Region]
         });
         return res.status(200).send(villes)
     } catch (e) {

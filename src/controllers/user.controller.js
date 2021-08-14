@@ -5,27 +5,34 @@ const Article = db.Article
 const Location = db.Location
 const Categorie = db.Categorie
 const decoder = require('jwt-decode')
+const {sendPushNotification} = require('../utilities/pushNotification')
 
 
 updateProfile = async (req, res, next) => {
     try {
 
-        const registeredUser = await User.findByPk(req.body.userId)
+        const registeredUser = await User.findByPk(req.body.userId, {
+            attributes: {exclude: ['password']}
+        })
         if(!registeredUser) return res.status(404).send(`L'utilisateur d'id ${req.body.userId} n'existe pas`)
-
-            registeredUser.username = req.body.username
-            registeredUser.email = req.body.email
-            registeredUser.nom = req.body.nom
-            registeredUser.prenom = req.body.prenom
-            registeredUser.phone = req.body.phone
-            registeredUser.adresse = req.body.adresse
-            registeredUser.profession = req.body.profession
-            registeredUser.domaine = req.body.domaine
-            registeredUser.statusEmploi = req.body.statusEmploi
-
-        const newEdited = await registeredUser.save()
-        res.status(200).send(newEdited)
-
+        if(req.body.username) registeredUser.username = req.body.username
+        if (req.body.email) registeredUser.email = req.body.email
+        if(req.body.nom) registeredUser.nom = req.body.nom
+        if(req.body.prenom) registeredUser.prenom = req.body.prenom
+        if(req.body.phone) registeredUser.phone = req.body.phone
+        if(req.body.adresse) registeredUser.adresse = req.body.adresse
+        if(req.body.profession) registeredUser.profession = req.body.profession
+        if(req.body.domaine) registeredUser.domaine = req.body.domaine
+        if(req.body.statusEmploi) registeredUser.statusEmploi = req.body.statusEmploi
+        if(req.body.pushNotificationToken) {
+            const tokenExist = registeredUser.pushNotificationToken
+            registeredUser.pushNotificationToken = req.body.pushNotificationToken
+            const userData = registeredUser.username?registeredUser.username : registeredUser.email?registeredUser.email : ''
+            const message = tokenExist?`Bienvenue ${userData}, merci d'utiliser sabbat-confort sur votre nouvel appareil.` : `Bienvenue ${userData} nous sommes heureux de vous recevoir.`
+            sendPushNotification(message, [req.body.pushNotificationToken],'Bienvenue', {notifType: 'welcome'})
+        }
+        await registeredUser.save()
+        res.status(200).send(registeredUser)
     } catch (e) {
         next(e.message)
     }
@@ -156,7 +163,7 @@ const resetCompter = async (req, res, next) => {
         if(req.body.locationCompter) user.locationCompter = 0
         if(req.body.serviceCompter) user.serviceCompter = 0
         if(req.body.propositionCompter) user.propositionCompter = 0
-        if(req.body.parrainageCompter) user.parrainageCompter -= 1
+        if(req.body.parrainageCompter) user.parrainageCompter = 0
         await user.save()
         const updatedUser = await User.findByPk(user.id, {
             attributes:{exclude: ['password']}
@@ -167,17 +174,6 @@ const resetCompter = async (req, res, next) => {
     }
 }
 
-const resetParrainCompter = async (req, res, next) => {
-    try {
-        let currentUser = await User.findByPk(req.body.currentUserId)
-        if(!currentUser) return res.status(404).send('Vous netes pas connecté')
-        currentUser.parrainageCompter = 0
-        await currentUser.save()
-        return res.status(200).send(currentUser)
-    } catch (e) {
-        next(e.message)
-    }
-}
 module.exports = {
     updateProfile,
     addUserAvatar,
@@ -187,5 +183,4 @@ module.exports = {
     getUserFavoris,
     toggleUserFavoris,
     resetCompter,
-    resetParrainCompter
 }

@@ -1,11 +1,10 @@
 require('dotenv').config()
 const generateRandom = require('../utilities/generateRandom')
-const sendMail = require('../utilities/sendEmail')
 const db = require('../../db/models');
 const Op = db.Sequelize.Op;
 const User = db.User;
 const Role = db.Role;
-
+const {sendPushNotification} = require('../utilities/pushNotification')
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -15,11 +14,9 @@ let authToken = null;
 
 signup = async (req, res, next) => {
     const newUser = {
-        username: req.body.username,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 8)
     };
-
     try {
         let user = await User.create(newUser);
         if (req.body.roles) {
@@ -35,7 +32,6 @@ signup = async (req, res, next) => {
            await user.setRoles([3]);
         };
         res.status(201).send(` L'utilisateur a été créé avec succès`)
-
     } catch (error) {
         next(error.message)
     }
@@ -79,7 +75,15 @@ signin = async (req, res, next) => {
          }, process.env.JWT_KEY, {
              expiresIn: 86400
          });
-
+        if(!user.pushNotificationToken || user.isFirstConnect || user.pushNotificationToken !== req.body.pushNotificationToken) {
+            user.pushNotificationToken = req.body.pushNotificationToken
+            user.isFirstConnect = false
+            await user.save()
+            if(req.body.pushNotificationToken) {
+                const userData = user.username?user.username : user.email?user.email : ''
+                sendPushNotification(`Bienvenue ${userData}, nous sommes heureux de vous recevoir`, [req.body.pushNotificationToken], 'Bienvenue', {notifType: 'welcome'})
+            }
+        }
         return res.status(200).send({
             accessToken: authToken
         })
@@ -103,7 +107,6 @@ const sendResetInfoMail = async (req, res, next) => {
         const newResetToken = bcrypt.hashSync(formatedCode, 8)
         selectedUser.resetToken = newResetToken
         await selectedUser.save()
-        sendMail.resetUserInfo(generatedCode, req.body.email)
         return res.status(200).send('le code de reinitialisation a été envoyé')
     } catch (e) {
         next(e.message)
@@ -111,7 +114,6 @@ const sendResetInfoMail = async (req, res, next) => {
 }
 
 const modifyUserInfos = async (req, res, next) => {
-    console.log('modifying user data......................')
     try {
     let selectedUser = await User.findOne({
         where: {

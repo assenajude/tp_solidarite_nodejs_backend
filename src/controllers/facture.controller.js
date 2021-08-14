@@ -8,6 +8,8 @@ const Tranche = db.Tranche
 const OrderParrain = db.OrderParrain
 const CompteParrainage = db.CompteParrainage
 const checkConnectedUser = require('../utilities/checkAdminConnect')
+const {sendPushNotification} = require('../utilities/pushNotification')
+const {getParrainsTokens} = require('../utilities/getParrainsTokens')
 
 const createFacture = async (req, res, next)=> {
     try {
@@ -38,11 +40,12 @@ updateFacture = async (req, res, next) => {
         facture.solde += data.solde
         const ratio = facture.solde / facture.montant
         facture.ratio = ratio
+        let selectedOrder;
         if(facture.solde === facture.montant) {
            facture.dateCloture = Date.now()
            facture.ratio = 1
            facture.status = 'soldé'
-            const selectedOrder = await Commande.findByPk(facture.CommandeId)
+            selectedOrder= await Commande.findByPk(facture.CommandeId)
             const orderParrainages = await selectedOrder.getCompteParrainages()
             const montantParraine = selectedOrder.montant - selectedOrder.interet
 
@@ -66,6 +69,12 @@ updateFacture = async (req, res, next) => {
                     selectedCompteParrainage.gain += aroundGain
                     await selectedCompteParrainage.save()
                 })(newCompte)
+            }
+            if(orderParrainages && orderParrainages.length>0) {
+               const parrainsTokens = await getParrainsTokens(orderParrainages)
+                if(parrainsTokens && parrainsTokens.length>0) {
+                    sendPushNotification(`La facture n° ${facture.numero} de la commande n° ${selectedOrder.numero} que vous avez parrainée a été soldée.`, parrainsTokens, `Facture n° ${facture.numero} soldée`, {notifType: 'parrainage', info: 'order'})
+                }
             }
         }
         await facture.save()

@@ -4,6 +4,7 @@ const router = express.Router();
 
 router.post('/',planCtrl.createPlan);
 router.get('/', planCtrl.getAllPlan)
+router.delete('/deleteOne', planCtrl.deletePlan)
 
 
 module.exports = router

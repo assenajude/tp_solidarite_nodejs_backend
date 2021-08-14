@@ -10,16 +10,13 @@ const addPointRelais = async (req, res, next) => {
         adresse: req.body.adresse,
         email: req.body.email
     }
-    const transaction = await db.sequelize.transaction()
     try {
-        let ville = await Ville.findByPk(idVille, {transaction});
+        const ville = await Ville.findByPk(idVille);
         if (!ville) return res.status(404).send(`la ville choisie n'existe pas `)
-       const pointRelais = await PointRelais.create(newPoint, {transaction});
-        await pointRelais.setVille(ville, {transaction})
-        await transaction.commit()
+       let pointRelais = await PointRelais.create(newPoint);
+        await pointRelais.setVille(ville)
         res.status(201).send(pointRelais)
     } catch (e) {
-        await transaction.rollback()
         next(e.message)
     }
 };

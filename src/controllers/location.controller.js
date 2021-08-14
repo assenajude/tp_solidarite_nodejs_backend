@@ -27,12 +27,18 @@ addNewLocation = async (req, res, next) => {
     try {
         let categorie = await Categorie.findByPk(idCategorie);
         if (!categorie) return res.status(404).send(`La categorie d'id ${idCategorie} n'existe pas`)
-        let location = await Location.create(newLocation);
-        await location.setCategorie(categorie)
+        let location;
+        if(req.body.locationId) {
+            location = await Location.findByPk(req.body.locationId)
+            await location.update(newLocation)
+        }else{
+        location = await Location.create(newLocation);
         const allLocation = await Location.findAll()
         locationLength = allLocation.length
         location.codeLocation = `LOC000${locationLength}`
         await location.save()
+        }
+        await location.setCategorie(categorie)
         const newAdded = await Location.findByPk(location.id,{
             include: [Categorie, ProductOption]
         })
@@ -54,7 +60,19 @@ getAllLocations = async (req, res, next) => {
     }
 }
 
+const deleteLocation = async (req, res, next) => {
+    try {
+        let selectedLocation = await Location.findByPk(req.body.locationId)
+        if(!selectedLocation)return res.status(404).send({message: "Location non trouvée"})
+        await selectedLocation.destroy()
+        return res.status(200).send({locationId: req.body.locationId})
+    } catch (e) {
+        next(e)
+    }
+}
+
 module.exports = {
     addNewLocation,
-    getAllLocations
+    getAllLocations,
+    deleteLocation
 }

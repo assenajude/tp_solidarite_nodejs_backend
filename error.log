@@ -1,2 +1,1 @@
-{"message":"connect ECONNABORTED 192.168.1.178:5432","level":"error"}
-{"message":"connect EHOSTUNREACH 192.168.1.178:5432","level":"error"}
+{"message":"aucune entr�e dans pg_hba.conf pour l'h�te � 192.168.8.116 �, utilisateur � postgres �,\nbase de donn�es � solidaritedb �, SSL inactif","level":"error"}

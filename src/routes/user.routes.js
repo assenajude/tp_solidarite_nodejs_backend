@@ -11,7 +11,6 @@ router.patch('/me/update', [veriryToken.verifyToken], mainUserCtrl.updateProfile
 router.get('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.getUserFavoris)
 router.patch('/me/favoris', [veriryToken.verifyToken], mainUserCtrl.toggleUserFavoris)
 router.patch('/me/resetCompter', veriryToken.verifyToken, mainUserCtrl.resetCompter)
-router.patch('/me/resetParrainCompter', veriryToken.verifyToken, mainUserCtrl.resetParrainCompter)
 
 
 module.exports = router

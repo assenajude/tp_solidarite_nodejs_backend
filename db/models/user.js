@@ -104,6 +104,13 @@ module.exports = (sequelize, DataTypes) => {
     resetToken: {
       type: DataTypes.STRING
     },
+    pushNotificationToken: {
+      type: DataTypes.STRING
+    },
+    isFirstConnect: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
   }, {
     sequelize,
     modelName: 'User',

@@ -2,7 +2,8 @@
 const db = require('../../db/models/index');
 const decoder = require('jwt-decode')
 const generateRandom = require('../utilities/generateRandom')
-const sendMail = require('../utilities/sendEmail')
+const {sendPushNotification} = require('../utilities/pushNotification')
+const {getParrainsTokens} = require('../utilities/getParrainsTokens')
 const Commande = db.Commande;
 const UserAdresse = db.UserAdresse;
 const Plan = db.Plan;
@@ -34,15 +35,18 @@ const saveOrder = async (req, res, next) => {
         }
         const plan = await Plan.findByPk(currentOrder.planId, {include: Payement})
         const modePayement = plan.Payement.mode
+        let accordDate;
         if(modePayement.toLowerCase() === 'cash') {
             statusAccord = 'Accepté'
+            accordDate = new Date()
+
         } else {
             statusAccord = 'traitement en cours'
         }
         const allSaved = await Commande.findAll();
         const ordersNums = allSaved.map(order => order.numero)
-        const min = 100000
-        const max = 999999
+        const min = 10000000
+        const max = 99999999
         const randomNumber = generateRandom(min, max)
         let lastCheck = false
         do {
@@ -52,14 +56,15 @@ const saveOrder = async (req, res, next) => {
             })
         }while (lastCheck)
        let order = await user.createCommande({
-           numero: `tpsodr${randomNumber}`,
+           numero: `sc${randomNumber}`,
            itemsLength: currentOrder.itemsLength,
            interet: currentOrder.interet,
            fraisTransport: currentOrder.fraisTransport,
            montant: currentOrder.montant,
            dateLivraisonDepart: currentOrder.dateLivraisonDepart,
            typeCmde: currentOrder.typeCmde,
-           statusAccord
+           statusAccord,
+           accordValidationDate : accordDate
        })
         if(userAdresse) {
             await order.setUserAdresse(userAdresse)
@@ -122,7 +127,7 @@ const saveOrder = async (req, res, next) => {
         await userShoppingCart.save()
 
       let newAdded =  await Commande.findByPk(order.id, {
-           include: [UserAdresse, Plan, CartItem, Facture, Contrat, Livraison],
+           include: [UserAdresse, Plan, CartItem, Facture, Contrat, Livraison,CompteParrainage, {model: User, attributes:{exclude: ['password']}}],
            })
 
         if(modePayement.toLowerCase() === 'cash') {
@@ -130,9 +135,11 @@ const saveOrder = async (req, res, next) => {
         }
         await user.save()
         const parrainsTab = req.body.parrains
+        const parrainsTokens = []
         for(let i = 0; i<parrainsTab.length; i++) {
             const newParrain = parrainsTab[i];
             (async function (parrain) {
+                if(parrain.User.pushNotificationToken) parrainsTokens.push(parrain.User.pushNotificationToken)
                 let selectParrain = await CompteParrainage.findByPk(parrain.id)
                 selectParrain.quotite -= parrain.parrainAction
                 selectParrain.depense += parrain.parrainAction
@@ -145,7 +152,13 @@ const saveOrder = async (req, res, next) => {
 
             })(newParrain)
         }
-        // sendMail.orderSuccessMail(user,req.body.items, req.body.fraisTransport, req.body.interet, req.body.montant)
+        const userData = user.username?user.username : user.email?user.email : ''
+        if(user.pushNotificationToken) {
+            sendPushNotification(`Felication ${userData}, votre commande n° ${newAdded.numero} a été reçue et est en cours de traitement.`, [user.pushNotificationToken], 'Commande reçue', {notifType: 'order', orderId:newAdded.id})
+        }
+        if(parrainsTokens.length>0) {
+            sendPushNotification(`Vous avez été sollicité par ${userData} pour parrainer sa commande n° ${newAdded.numero}`, parrainsTokens, `Parrainage commande n° ${newAdded.numero}`, {notifType: 'parrainage', info: 'order'})
+        }
        return  res.status(200).send(newAdded)
     } catch (e) {
         next(e.message)
@@ -172,6 +185,7 @@ updateOrder = async (req, res, next) => {
         if(!order) return res.status(404).send(`La commande que vous voulez modifier n'exite pas`)
         if (req.body.statusAccord) {
             order.statusAccord = req.body.statusAccord
+            order.accordValidationDate = new Date()
         }
         if (req.body.statusLivraison) {
         order.statusLivraison = req.body.statusLivraison
@@ -182,11 +196,20 @@ updateOrder = async (req, res, next) => {
         if(req.body.isExpired) {
             order.isExpired = req.body.isExpired
         }
-        await currentUser.save()
         await order.save()
         const updatedOrder = await Commande.findByPk(order.id, {
-            include: [UserAdresse, Plan, CartItem, Facture, Contrat, {model: User, attributes: {exclude: 'password'}}]
+            include: [UserAdresse,CompteParrainage, Plan, CartItem, Facture, Contrat, {model: User, attributes: {exclude: 'password'}}]
         })
+        if(currentUser.pushNotificationToken) {
+            sendPushNotification(`Votre commande ${updatedOrder.numero} a été mise à jour.`, [currentUser.pushNotificationToken], 'Commande mise à jour', {notifType: 'order', id: updatedOrder.id})
+        }
+        const parrainageComptes = updatedOrder.CompteParrainages
+        if(parrainageComptes && parrainageComptes.length>0) {
+            const parrainsTokens = await getParrainsTokens(parrainageComptes)
+            if(parrainsTokens && parrainsTokens.length>0) {
+                sendPushNotification(`Bonjour la commande n° ${updatedOrder.numero} que vous avez parrainée a été modifiée.`,parrainsTokens, `Modification commande n° ${updatedOrder.numero}`, {notifType: 'parrainage', info: 'order'} )
+            }
+        }
         return res.status(200).send(updatedOrder)
     } catch (e) {
         next(e.message)
@@ -230,14 +253,19 @@ createOrderContrat = async (req, res, next) => {
         mensualite: req.body.nbMensualite,
         status: req.body.status
     }
-
     try{
         let order = await Commande.findByPk(orderId)
         if(!order) return res.status(404).send("La commande n'existe pas")
         await order.createContrat(contratData)
         const justUpdated = await Commande.findByPk(orderId,{
-            include: [UserAdresse,Plan, CartItem, Facture, Contrat]
+            include: [UserAdresse,Plan, CartItem, Facture, Contrat, CompteParrainage]
         })
+        if(justUpdated.CompteParrainages && justUpdated.CompteParrainages.length>0) {
+            const parrainsTokens = await getParrainsTokens(justUpdated.CompteParrainages)
+            if(parrainsTokens && parrainsTokens.length>0) {
+                sendPushNotification(`La commande n° ${justUpdated.numero} que vous avez parrainée est passée en contrat.`, parrainsTokens, `Contrat commande n° ${justUpdated.numero}`, {notifType: 'parrainage', info: 'order'})
+            }
+        }
         return res.status(200).send(justUpdated)
     } catch (e) {
         next(e.message)
@@ -257,9 +285,14 @@ updateOrderContrat = async (req, res, next) => {
         selectedContrat.dateCloture = req.body.dateCloture
         await selectedContrat.save()
         const updatedOrder = await Commande.findByPk(commandeId, {
-            include: [UserAdresse,  Plan, CartItem, Contrat, Facture]
+            include: [UserAdresse,  Plan, CartItem, Contrat, Facture, CompteParrainage]
         })
-
+        if(updatedOrder.CompteParrainages.length>0) {
+            const parrainsTokens = await getParrainsTokens(updatedOrder.CompteParrainages)
+            if(parrainsTokens && parrainsTokens.length>0) {
+                sendPushNotification(`La commande n° ${updatedOrder.numero} qui était en contrat recemment a été modifiée.`, parrainsTokens, `Modification commande n° ${updatedOrder.numero}`, {notifType: 'parrainage', info: 'order'})
+            }
+        }
         return res.status(200).send(updatedOrder)
 
     } catch (e) {

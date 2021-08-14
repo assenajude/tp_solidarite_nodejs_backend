@@ -12,7 +12,13 @@ createCategorie = async (req, res, next) => {
     try {
         let selectedEspace = await Espace.findByPk(req.body.idEspace)
         if(!selectedEspace) return res.status(404).send('Vous devez choisir un espace pour ajouter une categorie')
-        let categorie = await selectedEspace.createCategorie(newCategorie);
+        let categorie;
+        if(req.body.categorieId) {
+            categorie = await Categorie.findByPk(req.body.categorieId)
+            await categorie.update(newCategorie)
+        }else {
+            categorie = await selectedEspace.createCategorie(newCategorie);
+        }
         let type = ''
         if(selectedEspace.nom.toLowerCase() === 'e-commerce') {
             type = 'article'
@@ -54,9 +60,25 @@ const getEspaceCategorie = async (req, res, next) => {
     }
 }
 
+const deleteCategorie = async (req, res, next) => {
+    try {
+        let selectedCategorie = await Categorie.findByPk(req.body.categorieId)
+        if(!selectedCategorie) return res.status(404).send({message: "categorie non trouvée"})
+        const categorieArticles = await selectedCategorie.getArticles()
+        const categorieLocations = await selectedCategorie.getLocations()
+        const categorieServices = await selectedCategorie.getServices()
+        const categorieProducts = [...categorieArticles, ...categorieLocations, ...categorieServices]
+        if(categorieProducts.length>0) return res.status(403).send({message: "Vous ne pouvez pas supprimer cette categorie."})
+        await selectedCategorie.destroy()
+        return res.status(200).send({categorieId: req.body.categorieId})
+    } catch (e) {
+        next(e)
+    }
+}
 
 module.exports = {
     createCategorie,
     getAllCategories,
-    getEspaceCategorie
+    getEspaceCategorie,
+    deleteCategorie
 }
