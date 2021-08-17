@@ -45,8 +45,8 @@ const saveOrder = async (req, res, next) => {
         }
         const allSaved = await Commande.findAll();
         const ordersNums = allSaved.map(order => order.numero)
-        const min = 10000000
-        const max = 99999999
+        const min = 1000000
+        const max = 9999999
         const randomNumber = generateRandom(min, max)
         let lastCheck = false
         do {
@@ -55,8 +55,9 @@ const saveOrder = async (req, res, next) => {
                 lastCheck = lastCheck || newCheck
             })
         }while (lastCheck)
+        const endedLetter =currentOrder.typeCmde === 'article'?'a': currentOrder.typeCmde === 'location'?'l' : 's'
        let order = await user.createCommande({
-           numero: `sc${randomNumber}`,
+           numero: `sc${randomNumber}${endedLetter}`,
            itemsLength: currentOrder.itemsLength,
            interet: currentOrder.interet,
            fraisTransport: currentOrder.fraisTransport,

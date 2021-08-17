@@ -1,11 +1,32 @@
-
 const db = require('../../db/models')
+const randomstring = require('randomstring')
+const bcrypt = require('bcryptjs')
+const adminUser = require('../utilities/checkAdminConnect')
 const User = db.User
 const Article = db.Article
 const Location = db.Location
 const Categorie = db.Categorie
 const decoder = require('jwt-decode')
 const {sendPushNotification} = require('../utilities/pushNotification')
+
+
+const getAllUsers = async (req, res, next) => {
+    const token = req.headers['x-access-token']
+    const user = decoder(token)
+    const isAdmin = adminUser(user)
+    try {
+        let allUsers = []
+        if(!isAdmin)return res.status(401).send("Vous netes pas autorisés.")
+            if(isAdmin){
+                allUsers = await User.findAll({
+                    attributes: {exclude: ['password']}
+                })
+            }
+            return res.status(200).send(allUsers)
+    }catch (e) {
+        next(e)
+    }
+}
 
 
 updateProfile = async (req, res, next) => {
@@ -26,9 +47,9 @@ updateProfile = async (req, res, next) => {
         if(req.body.statusEmploi) registeredUser.statusEmploi = req.body.statusEmploi
         if(req.body.pushNotificationToken) {
             const tokenExist = registeredUser.pushNotificationToken
-            registeredUser.pushNotificationToken = req.body.pushNotificationToken
             const userData = registeredUser.username?registeredUser.username : registeredUser.email?registeredUser.email : ''
             const message = tokenExist?`Bienvenue ${userData}, merci d'utiliser sabbat-confort sur votre nouvel appareil.` : `Bienvenue ${userData} nous sommes heureux de vous recevoir.`
+            registeredUser.pushNotificationToken = req.body.pushNotificationToken
             sendPushNotification(message, [req.body.pushNotificationToken],'Bienvenue', {notifType: 'welcome'})
         }
         await registeredUser.save()
@@ -174,6 +195,51 @@ const resetCompter = async (req, res, next) => {
     }
 }
 
+
+const resetCredentials = async (req, res, next) => {
+    try {
+        let selectedUser;
+        if(req.body.email) {
+            selectedUser = await User.findOne({
+                where: {
+                    email: req.body.email
+                }
+            })
+        }
+        if(!selectedUser) return res.status(404).send({message: "Utilisateur non trouvé."})
+        const newPassword = randomstring.generate({
+            length: 8,
+            charset: 'alphanumeric'
+        });
+        await selectedUser.update({
+            password: bcrypt.hashSync(String(newPassword), 8)
+        })
+        if(selectedUser.pushNotificationToken) {
+            const userName = selectedUser.username?selectedUser.username : selectedUser.nom?selectedUser.nom: ''
+            sendPushNotification(`${userName} vos paramètres de connexion ont été reinitialisés, veuillez nous contacter pour avoir les nouveaux paramètres.`, [selectedUser.pushNotificationToken], "Reinitialisation paramètres de connexion.", {notifType: "params"})
+        }
+        return res.status(200).send({randomCode: newPassword})
+    } catch (e) {
+        next(e)
+    }
+}
+const changeCredentials = async (req,res, next) => {
+    try {
+        const selectedUser = await User.findByPk(req.body.userId)
+        if(req.body.oldPass) {
+            const isValidPass = bcrypt.compareSync(req.body.oldPass, selectedUser.password)
+            if(!isValidPass)return res.status(401).send({message: "Le mot de passe ne correspond pas à celui enregistré"})
+            selectedUser.password = bcrypt.hashSync(req.body.newPass, 8)
+        }
+        await selectedUser.save()
+        const userName = selectedUser.username?selectedUser.username : selectedUser.nom?selectedUser.nom: ''
+        sendPushNotification(`${userName} vos paramètres de connexion viennent d'être changés, si cela ne vient pas de vous, contactez-nous immediatement.`, [selectedUser.pushNotificationToken], "Reinitialisation paramètres de connexion.", {notifType: "params"})
+        return res.status(200).send({message: "Vos paramètres ont été mis à jour avec succès."})
+    } catch (e) {
+        next(e)
+    }
+}
+
 module.exports = {
     updateProfile,
     addUserAvatar,
@@ -183,4 +249,7 @@ module.exports = {
     getUserFavoris,
     toggleUserFavoris,
     resetCompter,
+    resetCredentials,
+    changeCredentials,
+    getAllUsers
 }

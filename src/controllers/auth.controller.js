@@ -1,5 +1,4 @@
 require('dotenv').config()
-const generateRandom = require('../utilities/generateRandom')
 const db = require('../../db/models');
 const Op = db.Sequelize.Op;
 const User = db.User;
@@ -92,52 +91,8 @@ signin = async (req, res, next) => {
     }
 };
 
-const sendResetInfoMail = async (req, res, next) => {
-    try {
-        let selectedUser = await User.findOne({
-            where: {
-                email: req.body.email
-            }
-        })
-        if(!selectedUser) return res.status(404).send('Le mail fourni ne correspond à aucun utilisateur')
-        const max = 100000
-        const min = 999999
-        const generatedCode = generateRandom(min, max)
-        const formatedCode = String(generatedCode)
-        const newResetToken = bcrypt.hashSync(formatedCode, 8)
-        selectedUser.resetToken = newResetToken
-        await selectedUser.save()
-        return res.status(200).send('le code de reinitialisation a été envoyé')
-    } catch (e) {
-        next(e.message)
-    }
-}
-
-const modifyUserInfos = async (req, res, next) => {
-    try {
-    let selectedUser = await User.findOne({
-        where: {
-            email: req.body.email
-        }
-    })
-        if(!selectedUser) return res.status(404).send("L'utilisateur n'a pas été trouvé")
-
-        const codeValid = bcrypt.compareSync(
-            req.body.code, selectedUser.resetToken
-        );
-        if(!codeValid) return res.status(403).send('les codes ne correspondent pas')
-        if(req.body.username && req.body.username.length>0) selectedUser.username = req.body.username
-        if(req.body.password && req.body.password.length>0) selectedUser.password = bcrypt.hashSync(req.body.password, 10)
-        await selectedUser.save()
-        return res.status(200).send('Infos mis à jour avec succès ')
-    } catch (e) {
-        next(e.message)
-    }
-}
 
 module.exports = {
     signup,
     signin,
-    sendResetInfoMail,
-    modifyUserInfos
 }

@@ -11,7 +11,5 @@ router.post('/signup', [
 ], userCtrl.signup);
 
 router.post('/signin', userCtrl.signin);
-router.patch('/resetMail', userCtrl.sendResetInfoMail)
-router.patch('/modifyInfos', userCtrl.modifyUserInfos)
 
 module.exports = router;

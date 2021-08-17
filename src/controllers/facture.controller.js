@@ -64,6 +64,7 @@ updateFacture = async (req, res, next) => {
                     const gain = actionPercent * selectedOrder.interet / 100
                     const aroundGain = Math.round(gain)
                     let selectedCompteParrainage = await CompteParrainage.findByPk(currentCompte.id)
+                    if(!selectedCompteParrainage)return res.status(404).send({message: 'Le compte de parrainage introuvable.'})
                     selectedCompteParrainage.quotite += selectedOrderParrain.action
                     selectedCompteParrainage.depense -=  selectedOrderParrain.action
                     selectedCompteParrainage.gain += aroundGain
