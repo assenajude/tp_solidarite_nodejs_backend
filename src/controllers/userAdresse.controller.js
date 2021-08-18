@@ -32,7 +32,7 @@ const addUserAdresse = async (req, res, next) => {
         await newUserAdresse.setPointRelai(point)
         await newUserAdresse.setUser(user)
         const newAdded = await UserAdresse.findByPk(newUserAdresse.id, {
-            include:[ PointRelais, User]
+            include:[ PointRelais, {model: User, attributes: {exclude: ['password']}}]
         })
         return res.status(201).send(newAdded)
     } catch (e) {

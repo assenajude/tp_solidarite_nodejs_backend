@@ -31,7 +31,6 @@ const getAllEspace = async (req, res, next) => {
 }
 
 const deleteEspace = async (req, res, next) => {
-    console.log('deleting espace..............................;', req.body)
     try {
         const selectedEspace = await Espace.findByPk(req.body.espaceId)
         if(!selectedEspace) return res.status(404).send({message: "espace non trouvé"})

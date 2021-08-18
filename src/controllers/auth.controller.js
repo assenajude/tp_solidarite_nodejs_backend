@@ -91,8 +91,39 @@ signin = async (req, res, next) => {
     }
 };
 
+const autoLoginUser = async (req, res, next) => {
+    try {
+        const selectedUser = await User.findOne({
+            where: {
+                email: req.body.email
+            }
+        })
+        if(!selectedUser)return res.status(404).send({message: "Utilisateur non trouvé"})
+        let authorities = [];
+        const roles = await selectedUser.getRoles();
+        roles.forEach(role => {
+            authorities.push('ROLE_' + role.name.toUpperCase())
+        })
+        authToken = jwt.sign({
+            id: selectedUser.id,
+            username: selectedUser.username,
+            email:selectedUser.email,
+            roles: authorities,
+        }, process.env.JWT_KEY, {
+            expiresIn: 86400
+        });
+        return res.status(200).send({
+            accessToken: authToken
+        })
+    }catch (e) {
+        next(e)
+    }
+
+}
+
 
 module.exports = {
     signup,
     signin,
+    autoLoginUser
 }

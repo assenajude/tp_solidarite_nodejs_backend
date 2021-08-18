@@ -11,5 +11,6 @@ router.post('/signup', [
 ], userCtrl.signup);
 
 router.post('/signin', userCtrl.signin);
+router.post('/autoLogin', userCtrl.autoLoginUser);
 
 module.exports = router;
