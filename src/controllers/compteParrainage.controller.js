@@ -23,11 +23,8 @@ const createCompteParrainage = async (req, res, next) => {
     try {
         let connectedUser = await User.findByPk(idUser)
         if(!connectedUser) return res.status(404).send("le compte d'utilisateur n'a pas été trouvé")
-        const existComptes = connectedUser.getCompteParrainages()
-        const exitCompte = connectedUser.getCompteParrainage()
-        console.log('compte parrainages....................',existComptes);
-        console.log('compte parrainage....................',exitCompte);
-        if(existComptes && existComptes.length>0) {
+        const exitCompte = await connectedUser.getCompteParrainage()
+        if(exitCompte && Object.keys(exitCompte.dataValues).length>0) {
             return res.status(401).send({message: "Vous avez deja un compte de parrainage."})
         }
         const newCompteParrain = await connectedUser.createCompteParrainage(data)
