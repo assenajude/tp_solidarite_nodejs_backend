@@ -4,6 +4,7 @@ const {sendPushNotification} = require('../utilities/pushNotification')
 const Facture = db.Facture
 const Tranche = db.Tranche
 const Commande = db.Commande
+const User = db.User
 const CompteParrainage = db.CompteParrainage
 
 const decoder = require('jwt-decode')
@@ -30,28 +31,32 @@ const createTranche = async (req, res, next) => {
 }
 
 updateTranche = async (req, res, next) => {
-    const token = req.headers['x-access-token']
-    const user = decoder(token)
-    const userIsAdmin = isAdmin(user)
-    let payedState =''
-    if(userIsAdmin) {
-       payedState = 'confirmed'
-    } else {
-        payedState = 'pending'
-    }
     try {
         let tranche = await Tranche.findByPk(req.body.id, {
             include: Facture
         })
         if(!tranche)return res.status(404).send(`Impossible de trouver la tranche d'id ${req.body.id}`)
-        await tranche.update({
-            solde: req.body.montant,
-            payed: true,
-            payedState
-        })
-        const selectedOrder = await Commande.findByPk(tranche.Facture.OrderId, {
+        const selectedFacture = await Facture.findByPk(tranche.FactureId)
+        const selectedOrder = await Commande.findByPk(selectedFacture.CommandeId, {
             include: CompteParrainage
         })
+        if(req.body.validation) {
+            if(tranche.montant === tranche.solde) {
+                tranche.payedState ='confirmed'
+                tranche.payed=true
+                const orderUser = await User.findByPk(selectedOrder.UserId)
+                const userName = orderUser.username?orderUser.username : orderUser.nom?orderUser.nom : orderUser.email
+                if(orderUser && orderUser.pushNotificationToken) {
+                    sendPushNotification(`Bonjour ${userName}, le payement de la tranche ${tranche.numero} de votre facture ${tranche.Facture.numero} a été confirmé.`, [orderUser.pushNotificationToken], `Confirmation payement tranche ${tranche.numero}`, {notifType: 'Facture', id:tranche.Facture.id})
+                }
+            }else {
+                return res.status(403).send({message: "le solde de la tranche est insuffisant."})
+            }
+        }else {
+            tranche.solde += req.body.montant
+            tranche.payedState = 'pending'
+        }
+        await tranche.save()
         if(selectedOrder && selectedOrder.CompteParrainage && selectedOrder.CompteParrainage.length>0) {
             const parrainsTokens = await getParrainsTokens(selectedOrder.CompteParrainage)
             if(parrainsTokens && parrainsTokens.length>0) {

@@ -4,7 +4,7 @@ const userToken = require('../middlewares/auth.jwt')
 const compteParrainCtrl = require('../controllers/compteParrainage.controller')
 
 router.post('/',userToken.verifyToken,compteParrainCtrl.createCompteParrainage )
-router.post('/allComptes',compteParrainCtrl.getAllParrainCompte)
+router.get('/allComptes',compteParrainCtrl.getAllParrainCompte)
 router.patch('/parrainageRequest', compteParrainCtrl.sendParrainageRequest)
 router.patch('/parrainageResponse', compteParrainCtrl.respondToParrainageMessage)
 router.patch('/manageParrainage', compteParrainCtrl.getParrainageManaged)

@@ -117,12 +117,11 @@ const getUserCompte = async (req, res, next) => {
     }
 }
 const getAllParrainCompte = async (req, res, next) => {
-    const userId = req.body.userId
     try {
         const allParrains = await CompteParrainage.findAll({
             include: [{model:User,attributes:{exclude: ['password']}}, Commande]
         })
-        return res.status(200).send({comptes:allParrains, userId})
+        return res.status(200).send({comptes:allParrains})
     } catch (e) {
         next(e.message)
     }
