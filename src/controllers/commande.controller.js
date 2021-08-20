@@ -301,6 +301,18 @@ updateOrderContrat = async (req, res, next) => {
     }
 }
 
+const getSectedOrder = async (req, res, next) => {
+    try {
+        const selectedOrder = await Commande.findByPk(req.body.orderId, {
+            include: [UserAdresse,CompteParrainage, Plan, CartItem, Facture, Contrat, {model: User, attributes: {exclude: 'password'}}]
+        })
+        if(!selectedOrder) res.status(404).send({message: "Commande non trouvée"})
+        return res.status(200).send(selectedOrder)
+    }catch (e) {
+        next(e)
+    }
+}
+
 
 module.exports = {
     getOrdersByUser,
@@ -308,5 +320,6 @@ module.exports = {
     updateOrder,
     deleteOrder,
     createOrderContrat,
-    updateOrderContrat
+    updateOrderContrat,
+    getSectedOrder
 }

@@ -4,6 +4,7 @@ const Op = db.Sequelize.Op
 const Facture = db.Facture
 const User = db.User
 const Commande = db.Commande
+const CartItem = db.CartItem
 const Tranche = db.Tranche
 const OrderParrain = db.OrderParrain
 const CompteParrainage = db.CompteParrainage
@@ -129,10 +130,26 @@ const getAllFacture = async (req, res, next) => {
     }
 }
 
+const getSelectedFacture = async (req, res, next) => {
+    try {
+        const selectedFacture = await Facture.findByPk(req.body.factureId, {
+            include : [Commande, Tranche]
+        })
+        const factureCommande = await Commande.findByPk(selectedFacture.CommandeId, {
+            include: CartItem
+        })
+        if(!selectedFacture) return res.status(404).send({message: "Facture non trouvée"})
+        const data = {selectedFacture,cartItems: factureCommande.CartItems}
+        return res.status(200).send(data)
+    }catch (e) {
+        next(e)
+    }
+}
 
 module.exports = {
     createFacture,
     updateFacture,
     getUserFactures,
-    getAllFacture
+    getAllFacture,
+    getSelectedFacture
 }

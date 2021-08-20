@@ -209,8 +209,6 @@ const respondToParrainageMessage = async (req, res, next) => {
         selectedFilleulUser.parrainageCompter += 1
         await selectedFilleulUser.save()
         let selectedUser = await User.findByPk(req.body.currentUserId)
-        selectedUser.parrainageCompter -= 1
-        await selectedUser.save()
         const filleuls = await selectedUser.getFilleuls({
             attributes: {exclude: 'password'}
         })

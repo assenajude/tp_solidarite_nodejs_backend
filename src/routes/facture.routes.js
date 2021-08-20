@@ -7,5 +7,6 @@ router.post('/', factureCtrl.createFacture)
 router.patch('/update',token.verifyToken, factureCtrl.updateFacture)
 router.get('/byUser',token.verifyToken, factureCtrl.getUserFactures)
 router.get('/', factureCtrl.getAllFacture)
+router.post('/getOne',token.verifyToken, factureCtrl.getSelectedFacture)
 
 module.exports = router

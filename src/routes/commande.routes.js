@@ -9,5 +9,6 @@ router.patch('/contrats/update', orderCtrl.updateOrderContrat)
 router.get('/byUser',token.verifyToken, orderCtrl.getOrdersByUser)
 router.patch('/update', orderCtrl.updateOrder)
 router.delete('/delete',token.verifyToken, orderCtrl.deleteOrder)
+router.post('/getOne',token.verifyToken, orderCtrl.getSectedOrder)
 
 module.exports = router
