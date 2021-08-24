@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     couleur: DataTypes.STRING,
     taille: DataTypes.STRING,
-    modele: DataTypes.STRING
+    modele: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'ProductOption',
