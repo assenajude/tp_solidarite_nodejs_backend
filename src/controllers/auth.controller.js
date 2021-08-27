@@ -70,6 +70,7 @@ signin = async (req, res, next) => {
              id: user.id,
              username: user.username,
              email:user.email,
+             avatar: user.avatar,
              roles: authorities,
          }, process.env.JWT_KEY, {
              expiresIn: 86400
@@ -108,6 +109,7 @@ const autoLoginUser = async (req, res, next) => {
             id: selectedUser.id,
             username: selectedUser.username,
             email:selectedUser.email,
+            avatar: selectedUser.avatar,
             roles: authorities,
         }, process.env.JWT_KEY, {
             expiresIn: 86400

@@ -74,17 +74,6 @@ addUserAvatar = async (req, res, next) => {
     }
 }
 
-const getUserProfileAvatar = async (req, res, next) => {
-    try {
-        const userToken = req.headers['x-access-token']
-        const connectedUser = decoder(userToken)
-        const user = await User.findByPk(connectedUser.id)
-        if(!user || !user.avatar || user.avatar === '') return res.status(200).send({avatar: null})
-        return res.status(200).send({avatar:user.avatar})
-    } catch (e) {
-        next(e)
-    }
-}
 
 addUserPiece = async (req, res, next) => {
     try {
@@ -244,7 +233,6 @@ module.exports = {
     updateProfile,
     addUserAvatar,
     addUserPiece,
-    getUserProfileAvatar,
     getConnectedUserData,
     getUserFavoris,
     toggleUserFavoris,

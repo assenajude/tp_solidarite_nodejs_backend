@@ -12,7 +12,7 @@ const {sendPushNotification} = require('../utilities/pushNotification')
 const createCompteParrainage = async (req, res, next) => {
     const idUser = req.body.userId
     const data = {
-        initial: 5,
+        initial: 0,
         gain: 0,
         depense: 0,
         quotite: 0,
