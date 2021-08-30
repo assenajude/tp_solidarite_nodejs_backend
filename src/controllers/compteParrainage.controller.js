@@ -33,7 +33,7 @@ const createCompteParrainage = async (req, res, next) => {
         })
         return res.status(201).send(newAdded)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -50,7 +50,7 @@ const editInitialFund = async (req, res, next) => {
         })
         return res.status(200).send(newUpdated)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -67,7 +67,7 @@ const editQuotiteFund = async (req, res, next) => {
         })
         return res.status(200).send(justUpdated)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -88,7 +88,7 @@ const activeParrainCompte = async (req, res, next) => {
         }
         return res.status(200).send(activatedCompte)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -113,7 +113,7 @@ const getUserCompte = async (req, res, next) => {
         }
         return res.status(200).send(comptes)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 const getAllParrainCompte = async (req, res, next) => {
@@ -123,7 +123,7 @@ const getAllParrainCompte = async (req, res, next) => {
         })
         return res.status(200).send({comptes:allParrains})
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -154,7 +154,7 @@ const getUserParrainageData = async (req, res, next) => {
         const data = {parrains: userParrainsComptes, filleuls: userFilleulsComptes, userParrainsState:userParrains, userFilleulsState: userFilleuls}
         return res.status(200).send(data)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -189,7 +189,7 @@ const sendParrainageRequest = async (req, res, next) => {
         }
         return res.status(200).send(data)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -224,7 +224,7 @@ const respondToParrainageMessage = async (req, res, next) => {
         }
         return res.status(200).send(data)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -303,7 +303,7 @@ const getParrainageManaged = async (req, res, next) => {
         const data = {compte: updatedParrainageCompte, parrain: updatedCompte, isParrain}
         return res.status(200).send(data)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

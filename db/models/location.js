@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'locationId',
         otherKey: 'optionId'
       })
+      Location.belongsTo(models.Localisation)
     }
   };
   Location.init({

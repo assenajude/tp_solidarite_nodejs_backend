@@ -17,7 +17,7 @@ createContrat = async (req, res, next) => {
         })
         return res.status(201).send(newContrat)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

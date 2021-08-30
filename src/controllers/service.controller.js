@@ -51,7 +51,7 @@ getServices = async (req, res, next) => {
         const sortedServices = dataSorter(services)
         res.status(200).send(sortedServices)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

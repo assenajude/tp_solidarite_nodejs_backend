@@ -29,7 +29,7 @@ createPlan = async (req, res, next) => {
         })
         return res.status(201).send(justAdded)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 };
 
@@ -41,7 +41,7 @@ getAllPlan = async (req, res, next) => {
         if (!plans) return res.status(404).send('Aucun plan trouvé')
         return res.status(200).send(plans);
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 }

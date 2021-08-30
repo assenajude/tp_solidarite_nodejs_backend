@@ -126,7 +126,7 @@ incrementItemQuantity = async (req, res, next) => {
         await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -148,7 +148,7 @@ decrementItemQuantity = async (req, res, next) => {
         await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -168,7 +168,7 @@ updateItem = async (req, res, next) => {
         await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 }
@@ -210,7 +210,7 @@ removeItem = async (req, res, next) => {
         await shoppingCart.save()
         return res.status(200).send(item)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -246,7 +246,7 @@ getCartItems = async (req, res, next) => {
         }
         return res.status(200).send(allDatas)
     }catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

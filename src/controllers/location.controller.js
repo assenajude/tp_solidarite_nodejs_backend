@@ -2,6 +2,7 @@ const db = require('../../db/models/index');
 const Categorie = db.Categorie;
 const Location = db.Location
 const ProductOption = db.ProductOption
+const Localisation = db.Localisation
 const dataSorter = require('../utilities/dataSorter')
 
 addNewLocation = async (req, res, next) => {
@@ -25,8 +26,10 @@ addNewLocation = async (req, res, next) => {
 
     };
     try {
-        let categorie = await Categorie.findByPk(idCategorie);
+        const categorie = await Categorie.findByPk(idCategorie);
         if (!categorie) return res.status(404).send(`La categorie d'id ${idCategorie} n'existe pas`)
+        const localisation = await Localisation.findByPk(req.body.localisationId)
+        if(!localisation) return res.status(404).send({message: 'La localisation est introuvable.'})
         let location;
         if(req.body.locationId) {
             location = await Location.findByPk(req.body.locationId)
@@ -39,24 +42,25 @@ addNewLocation = async (req, res, next) => {
         await location.save()
         }
         await location.setCategorie(categorie)
+        await location.setLocalisation(localisation)
         const newAdded = await Location.findByPk(location.id,{
-            include: [Categorie, ProductOption]
+            include: [Categorie, ProductOption, Localisation]
         })
       return res.status(201).send(newAdded)
     } catch (e) {
-        next (e.message)
+        next (e)
     }
 };
 
 getAllLocations = async (req, res, next) => {
     try{
         const locations = await Location.findAll({
-            include: [Categorie, ProductOption]
+            include: [Categorie,Localisation, ProductOption]
         })
         const sortedLocations = dataSorter(locations)
         return res.status(200).send(sortedLocations)
     } catch (e) {
-      next(e.message)
+      next(e)
     }
 }
 

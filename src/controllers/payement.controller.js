@@ -18,7 +18,7 @@ addPayement =  async (req, res, next) => {
         }
         return res.status(201).send(payement)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -30,7 +30,7 @@ getAllPayement = async (req, res, next) => {
         return res.status(200).send(payements)
 
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

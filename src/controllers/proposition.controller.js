@@ -24,7 +24,7 @@ const newProposition = async (req, res, next) => {
         const proposition = await connectedUser.createProposition(propositionData)
         return res.status(201).send(proposition)
     }catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -33,7 +33,7 @@ const getAllProposition = async (req, res, next) => {
         const allPropositions = await Proposition.findAll()
         return res.status(200).send(allPropositions)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -65,7 +65,7 @@ const editProposition = async (req, res, next) => {
         }
         return res.status(200).send(updated)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

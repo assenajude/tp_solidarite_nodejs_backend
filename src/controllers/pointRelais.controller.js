@@ -17,7 +17,7 @@ const addPointRelais = async (req, res, next) => {
         await pointRelais.setVille(ville)
         res.status(201).send(pointRelais)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 };
 
@@ -28,7 +28,7 @@ const getAllPoint = async (req, res, next) => {
         });
         return res.status(200).send(allPoints)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

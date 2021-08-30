@@ -31,7 +31,7 @@ const getUploadSignature = async (req, res, next) => {
         }
         return res.status(200).send(requestDataArray)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

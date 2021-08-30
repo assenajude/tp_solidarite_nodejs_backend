@@ -162,7 +162,7 @@ const saveOrder = async (req, res, next) => {
         }
        return  res.status(200).send(newAdded)
     } catch (e) {
-        next(e.message)
+        next(e)
 
     }
 }
@@ -175,7 +175,7 @@ deleteOrder = async (req, res, next) => {
         await order.destroy()
         return res.status(200).send(item)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -213,7 +213,7 @@ updateOrder = async (req, res, next) => {
         }
         return res.status(200).send(updatedOrder)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -239,7 +239,7 @@ getOrdersByUser = async (req,res, next) => {
         return res.status(200).send(userOrders)
     } catch (e) {
         await transaction.rollback()
-        next(e.message)
+        next(e)
     }
 }
 

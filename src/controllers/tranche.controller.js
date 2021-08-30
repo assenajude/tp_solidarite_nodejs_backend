@@ -7,8 +7,6 @@ const Commande = db.Commande
 const User = db.User
 const CompteParrainage = db.CompteParrainage
 
-const decoder = require('jwt-decode')
-const isAdmin = require('../utilities/checkAdminConnect')
 
 const createTranche = async (req, res, next) => {
     const factureId = req.body.factureId
@@ -26,7 +24,7 @@ const createTranche = async (req, res, next) => {
         await newTranche.save()
         return res.status(201).send(newTranche)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -65,7 +63,7 @@ updateTranche = async (req, res, next) => {
         }
         res.status(200).send(tranche)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -74,7 +72,7 @@ getAllTranches = async (req, res, next) => {
         const tranches = await Tranche.findAll()
         res.status(200).send(tranches)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

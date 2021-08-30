@@ -22,6 +22,7 @@ const propositionRoutes  = require('../routes/proposition.route')
 const faqRoutes = require('../routes/faq.routes')
 const s3Routes = require('../routes/s3_upload.routes')
 const compteParrainRoutes = require('../routes/compteParrainage.routes')
+const localisationRoutes = require('../routes/localisation.routes')
 
 module.exports = function routes(app) {
     app.use('/api/auth', authRoute);
@@ -48,4 +49,5 @@ module.exports = function routes(app) {
     app.use('/api/faq', faqRoutes)
     app.use('/api/uploadFile', s3Routes)
     app.use('/api/compteParrainages', compteParrainRoutes)
+    app.use('/api/localisations', localisationRoutes)
 }

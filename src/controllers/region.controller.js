@@ -13,7 +13,7 @@ const addRegion  = async (req, res, next) => {
     return res.status(201).send(newRegion)
     } catch (e) {
         await transaction.rollback()
-        next(e.message)
+        next(e)
     }
 };
 
@@ -24,7 +24,7 @@ getAllRegions = async (req, res, next) => {
         })
         return res.status(200).send(regions)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

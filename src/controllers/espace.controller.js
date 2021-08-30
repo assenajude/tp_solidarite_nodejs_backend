@@ -17,7 +17,7 @@ const createEspace = async (req, res, next) => {
         }
         return res.status(201).send(newEspace)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -26,7 +26,7 @@ const getAllEspace = async (req, res, next) => {
     const allEspace = await Espace.findAll()
         return res.status(200).send(allEspace)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

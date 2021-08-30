@@ -32,7 +32,7 @@ signup = async (req, res, next) => {
         };
         res.status(201).send(` L'utilisateur a été créé avec succès`)
     } catch (error) {
-        next(error.message)
+        next(error)
     }
 };
 
@@ -88,7 +88,7 @@ signin = async (req, res, next) => {
             accessToken: authToken
         })
     } catch (e) {
-        return res.status(500).send(e.message)
+     next(e)
     }
 };
 

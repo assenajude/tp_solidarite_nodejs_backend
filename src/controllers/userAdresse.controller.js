@@ -36,7 +36,7 @@ const addUserAdresse = async (req, res, next) => {
         })
         return res.status(201).send(newAdded)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 };
 
@@ -51,7 +51,7 @@ getUserAdresses = async (req, res, next) => {
         })
         return res.status(200).send(userAdresses)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -73,7 +73,7 @@ const updateUserAdresse = async (req, res, next) => {
         })
         return res.status(200).send(updated)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -85,7 +85,7 @@ const deleteUserAdresse = async (req, res, next) => {
         await selectedAdresse.destroy()
         return res.status(200).send(currentAdresse)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

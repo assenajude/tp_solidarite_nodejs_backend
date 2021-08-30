@@ -17,7 +17,7 @@ const addVille = async (req, res, next) => {
         })
         return res.status(201).send(newVille)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 };
 
@@ -28,7 +28,7 @@ getAllVilles = async (req, res, next) => {
         });
         return res.status(200).send(villes)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

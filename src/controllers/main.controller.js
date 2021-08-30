@@ -23,7 +23,7 @@ getAllData = async (req, res, next) => {
         return res.status(200).send(allData)
 
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -39,7 +39,7 @@ const deleteItem = async (req, res, next) => {
         await selectedItem.destroy()
         return res.status(200).send(currentItem)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

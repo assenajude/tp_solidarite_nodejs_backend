@@ -55,7 +55,7 @@ updateProfile = async (req, res, next) => {
         await registeredUser.save()
         res.status(200).send(registeredUser)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 }
@@ -83,7 +83,7 @@ addUserPiece = async (req, res, next) => {
         await user.save()
         return res.status(200).send(user.pieceIdentite)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -98,7 +98,7 @@ getConnectedUserData = async (req, res, next) => {
         if(!connectedUser) return res.status(404).send('Utilisateur non trouvé')
         return res.status(200).send(connectedUser)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -158,7 +158,7 @@ toggleUserFavoris = async (req, res, next) => {
         await user.save()
         return res.status(200).send(selected)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 }
@@ -180,7 +180,7 @@ const resetCompter = async (req, res, next) => {
         })
         return res.status(200).send(updatedUser)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

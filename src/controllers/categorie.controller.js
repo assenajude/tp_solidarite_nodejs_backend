@@ -31,7 +31,7 @@ createCategorie = async (req, res, next) => {
         await categorie.save()
        return  res.status(201).send(categorie)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 };
@@ -56,7 +56,7 @@ const getEspaceCategorie = async (req, res, next) => {
         const categoriesEspace = await selectedEspace.getCategories()
         return res.status(200).send(categoriesEspace)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

@@ -29,7 +29,7 @@ const createFacture = async (req, res, next)=> {
         await user.save()
         res.status(201).send(facture)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -85,7 +85,7 @@ updateFacture = async (req, res, next) => {
         })
         return res.status(200).send(justUpdated)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -115,7 +115,7 @@ getUserFactures = async (req,res, next) => {
         }
         res.status(200).send(userFactures)
     }catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -126,7 +126,7 @@ const getAllFacture = async (req, res, next) => {
         })
         return res.status(200).send(allFactures)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 

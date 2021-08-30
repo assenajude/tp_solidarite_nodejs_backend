@@ -19,7 +19,7 @@ const askQuestion = async (req, res, next) => {
         return res.status(201).send(newAdded)
 
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -43,7 +43,7 @@ const getAllQuestions = async (req, res, next) => {
     })
         return res.status(200).send(allQuestions)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 
 }
@@ -60,7 +60,7 @@ const giveResponse = async (req, res, next) => {
         await user.save()
         return res.status(200).send(response)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
@@ -71,7 +71,7 @@ const deleteQuestion = async (req, res, next)=> {
         await selectedQuestion.destroy()
         return res.status(200).send(question)
     } catch (e) {
-        next(e.message)
+        next(e)
     }
 }
 
