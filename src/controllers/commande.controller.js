@@ -218,27 +218,39 @@ updateOrder = async (req, res, next) => {
 }
 
 getOrdersByUser = async (req,res, next) => {
-    const transaction = await db.sequelize.transaction()
     let userOrders = []
     try{
         const token = req.headers['x-access-token']
         const user = decoder(token)
         const isAdmin = user.roles.indexOf('ROLE_ADMIN') !== -1
         if(isAdmin){
-            userOrders = await Commande.findAll({include:[UserAdresse,Plan, CartItem, Facture, Contrat, Livraison, CompteParrainage,{model:User, attributes: {exclude: 'password'}}],transaction})
+            userOrders = await Commande.findAll(
+                {include:[
+                        UserAdresse,
+                        Plan,
+                        CartItem,
+                        Facture,
+                        Contrat,
+                        Livraison,
+                        CompteParrainage,
+                        {model:User, attributes: {exclude: 'password'}}]})
         } else {
         userOrders = await Commande.findAll({
             where: {UserId: user.id},
             include: [
-                UserAdresse,Plan, CartItem, Facture, Contrat, Livraison,CompteParrainage,{model:User, attributes: {exclude: 'password'}}
-            ],
-            transaction
+                UserAdresse,
+                Plan,
+                CartItem,
+                Facture,
+                Contrat,
+                Livraison,
+                CompteParrainage,
+                {model:User, attributes: {exclude: 'password'}}
+            ]
         })
-        await transaction.commit()
         }
         return res.status(200).send(userOrders)
     } catch (e) {
-        await transaction.rollback()
         next(e)
     }
 }
@@ -259,7 +271,14 @@ createOrderContrat = async (req, res, next) => {
         if(!order) return res.status(404).send("La commande n'existe pas")
         await order.createContrat(contratData)
         const justUpdated = await Commande.findByPk(orderId,{
-            include: [UserAdresse,Plan, CartItem, Facture, Contrat, CompteParrainage]
+            include: [
+                UserAdresse,
+                Plan,
+                CartItem,
+                Facture,
+                Contrat,
+                CompteParrainage,
+                {model:User, attributes: {exclude: 'password'}}]
         })
         if(justUpdated.CompteParrainages && justUpdated.CompteParrainages.length>0) {
             const parrainsTokens = await getParrainsTokens(justUpdated.CompteParrainages)
