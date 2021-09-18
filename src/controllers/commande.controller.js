@@ -20,6 +20,7 @@ const CompteParrainage = db.CompteParrainage
 
 
 const saveOrder = async (req, res, next) => {
+    const cashback = req.body.order.cashback
     try{
     const token = req.headers['x-access-token']
         if(token=== 'null' || !token) return res.status(404).send('Impossible de passer la commande')
@@ -132,7 +133,13 @@ const saveOrder = async (req, res, next) => {
            })
 
         if(modePayement.toLowerCase() === 'cash') {
-            user.fidelitySeuil += newAdded.montant
+            user.cashback += cashback
+            if(plan.libelle.toLowerCase() === 'cash prime') {
+                user.fidelitySeuil += newAdded.montant
+            }
+        }
+        if(modePayement.toLowerCase() === 'credit' && req.body.order.couverture === 'fidelity') {
+            user.fidelitySeuil = 0
         }
         await user.save()
         const parrainsTab = req.body.parrains

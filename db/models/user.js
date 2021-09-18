@@ -61,6 +61,10 @@ module.exports = (sequelize, DataTypes) => {
     profession: DataTypes.STRING,
     domaine: DataTypes.STRING,
     statusEmploi: DataTypes.STRING,
+    cashback : {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     isHero: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

@@ -45,6 +45,7 @@ updateProfile = async (req, res, next) => {
         if(req.body.profession) registeredUser.profession = req.body.profession
         if(req.body.domaine) registeredUser.domaine = req.body.domaine
         if(req.body.statusEmploi) registeredUser.statusEmploi = req.body.statusEmploi
+        if(req.body.cashback) registeredUser.cashback = req.body.cashback
         if(req.body.pushNotificationToken) {
             const tokenExist = registeredUser.pushNotificationToken
             const userData = registeredUser.username?registeredUser.username : registeredUser.email?registeredUser.email : ''
