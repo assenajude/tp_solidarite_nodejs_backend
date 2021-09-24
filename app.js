@@ -1,5 +1,4 @@
 require('dotenv').config()
-const errorHandler = require('./src/middlewares/error.handler')
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -66,7 +65,12 @@ db.sequelize.sync().then(() => {
 require('./src/startup/routes')(app);
 require('./src/startup/prod')(app)
 
-app.use(errorHandler)
+app.use(() =>(error, req, res, next) => {
+    const statusCode = error.statusCode?error.statusCode : 500
+    const message = error.message?error.message : error
+    logger.info(message)
+    res.status(statusCode).send(message);
+})
 
 
 module.exports = app;
